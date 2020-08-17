@@ -49,6 +49,9 @@ public enum Token: String {
   case rpar = ")"
   case lsbr = "["
   case rsbr = "]"
+  
+  case sinQuote = "'"
+  case douQuote = "\""
 
   case eq = "=="
   case ne = "!="
