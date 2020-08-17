@@ -7,49 +7,41 @@
 //
 
 import XCTest
-@testable import Token
 
-class TokenTests: XCTestCase {
-	
-	func testBuildKeys() {
-        let keys = Token.testBuildKeys()
+@testable import z
 
-		do {
-            for (key, value) in keys {
-                XCTAssert(key == value.rawValue, "Failed to validate token keys")
-                XCTAssert(Token.keywords.contains(value), "Failed to validate token keywords")
-			}
-		} catch let err {
-			XCTFail("buildKeys() does not work properly: \(err)")
-		}
-	}
-	
-	func testAssign() {
-        let assign = ["=", "+=", "-=", "*=", "/=", "^=", "%=", "|=", "&=", ">>=", "<<="]
+final class tokenTests: XCTestCase {
 
-		do {
-            for ass in assign {
-                XCTAssert(Token(rawValue: ass)?.isAssign(), "Failed to test assign")
-            }
-		} catch let err {
-			XCTFail("testAssign() does not work properly: \(err)")
-		}
-	}
-	
-	func testDecl() {
-        let decl = ["enum", "interface", "fn", "struct", "const", "type", "var", "mut", "pub"]
-		do {
-            for dec in decl {
-                XCTAssert(Token(rawValue: ass)?.isDecl(), "Failed to test assign")
-            }
-		} catch let err {
-			XCTFail("testFloat() does not work properly: \(err)")
-		}
-	}
-    
-    static allTests = [
-        ("testDecl", testDecl),
-        ("testAssign", testAssign),
-        ("testBuildKeys", testBuildKeys),
-    ]
+  func testBuildKeys() {
+    let keys = Token.buildKeys()
+
+    for (key, value) in keys {
+      XCTAssert(key == value.rawValue, "Failed to validate token key: " + key)
+    }
+    XCTAssert(
+      Set<Token>(Token.keywords) == Set<Token>(keys.values), "Failed to validate token keywords")
+  }
+
+  func testAssign() {
+    let assign = ["=", "+=", "-=", "*=", "/=", "^=", "%=", "|=", "&=", ">>=", "<<="]
+
+    for ass in assign {
+      XCTAssert(Token(rawValue: ass)?.isAssign() != nil, "Failed to test assign: " + ass)
+    }
+    XCTAssert(Token.Assigns.count == assign.count, "Failed to test assign length.")
+  }
+
+  func testDecl() {
+    let decl = ["enum", "interface", "fn", "struct", "const", "type", "var", "mut", "pub"]
+    for dec in decl {
+      XCTAssert(Token(rawValue: dec)?.isDecl() != nil, "Failed to test decl: " + dec)
+    }
+    XCTAssert(Token.Decls.count == decl.count, "Failed to test decl length.")
+  }
+
+  static var allTests = [
+    ("testDecl", testDecl),
+    ("testAssign", testAssign),
+    ("testBuildKeys", testBuildKeys),
+  ]
 }
