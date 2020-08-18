@@ -195,6 +195,11 @@ class Scanner {
         return decNum()
     }
 
+
+    func string() -> String? {
+
+    }
+
     func error(_ str: String) {
         fatalError(str)
     }
