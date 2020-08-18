@@ -3,6 +3,7 @@
 // that can be found in the LICENSE file.
 
 public enum Token: String {
+  case none = ""
   case eof = "eof"
   case comment = "#"
   case name = "name"  // user
@@ -49,7 +50,7 @@ public enum Token: String {
   case rpar = ")"
   case lsbr = "["
   case rsbr = "]"
-  
+
   case sinQuote = "'"
   case douQuote = "\""
 
@@ -60,7 +61,11 @@ public enum Token: String {
   case ge = ">="
   case le = "<="
 
+  case tab = "\t"
   case nl = "\n"
+  case space = " "
+  case nl2 = "\r"
+
   case dot = "."
   case dotdot = "..."
 
@@ -133,7 +138,9 @@ public enum Token: String {
     .key_pub,
     .key_static,
   ]
+
   static let KEYWORDS = buildKeys()
+
   static let Decls: [Token] = [
     .key_enum,
     .key_interface,
@@ -154,6 +161,44 @@ public enum Token: String {
     .left_shift_assign,
   ]
 
+  static let Splits: [Token] = [
+    .lcbr,
+    .rcbr,
+    .lpar,
+    .rpar,
+    .lsbr,
+    .rsbr,
+    .question,
+    .comma,
+    .semicolon,
+    .colon,
+  ]
+
+  static let Whitespace: [Token] = [
+    .space,
+    .tab,
+    .nl,
+    .nl2,
+  ]
+
+  static let Operators: [Token] = [
+    .plus,
+    .minus,
+    .mul,
+    .div,
+    .mod,
+    .xor,
+    .pipe,
+    .not,
+    .bit_not,
+    .amp,
+    .dollar,
+    .at,
+    .assign,
+    .gt,
+    .lt,
+  ]
+
   static func keyToToken(_ key: String) -> Token? {
     return KEYWORDS[key]
   }
@@ -162,15 +207,98 @@ public enum Token: String {
     return keyToToken(key) != nil
   }
 
+  func isKeyword() -> Bool {
+    return Token.isKeyword(self.rawValue)
+  }
+
   func string() -> String {
     return self.rawValue
+  }
+
+  static func isDecl(_ str: String) -> Bool {
+    return Token.Decls.contains(Token(rawValue: str) ?? .none)
   }
 
   func isDecl() -> Bool {
     return Token.Decls.contains(self)
   }
 
+  static func isAssign(_ str: String) -> Bool {
+    return Token.Assigns.contains(Token(rawValue: str) ?? .none)
+  }
+
   func isAssign() -> Bool {
     return Token.Assigns.contains(self)
   }
+}
+
+extension Character {
+  static let binDigit: Set<Character> = ["0", "1"]
+  static let octDigit: Set<Character> = binDigit.union(["2", "3", "4", "5", "6", "7"])
+  static let decDigit: Set<Character> = octDigit.union(["8", "9"])
+  static let hexDigit: Set<Character> = decDigit.union(["A", "B", "C", "D", "E", "F", "a", "b", "c", "d", "e", "f"])
+
+  static let prefixHex = "0x"
+  static let prefixOct = "0o"
+  static let prefixBin = "0b"
+  static let prefixDec = ""
+  static let underscore: Character = "_"
+  static let hexExp = "p"
+  static let octExp = "p"
+  static let binExp = "p"
+  static let decExp = "e"
+
+  func isWhitespace() -> Bool {
+    return Token.Whitespace.contains(Token(rawValue: String(self)) ?? .none)
+  }
+
+  func isSplits() -> Bool {
+    return Token.Splits.contains(Token(rawValue: String(self)) ?? .none)
+  }
+
+  func isOperator() -> Bool {
+    return Token.Operators.contains(Token(rawValue: String(self)) ?? .none)
+  }
+
+  func isNewLine() -> Bool {
+    return [Token.nl, Token.nl2].contains(Token(rawValue: String(self)) ?? .none)
+  }
+
+  func isLetter() -> Bool {
+    return !isWhitespace() && !isSplits() && !isOperator()
+  }
+
+  func isBinDigit() -> Bool {
+    return Character.binDigit.contains(self)
+  }
+
+  func isOctDigit() -> Bool {
+    return Character.octDigit.contains(self)
+  }
+
+  func isDecDigit() -> Bool {
+    return Character.decDigit.contains(self)
+  }
+
+  func isHexDigit() -> Bool {
+    return Character.hexDigit.contains(self)
+  }
+
+  func isDigit(_ prefixStr: String) -> Bool {
+    switch (prefixStr) {
+    case Character.prefixBin:
+      return isBinDigit()
+    case Character.prefixHex:
+      return isHexDigit()
+    case Character.prefixOct:
+      return isOctDigit()
+    default:
+      return isDecDigit()
+    }
+  }
+
+  func isUnderScore() -> Bool {
+    return self == Character.underscore
+  }
+
 }
