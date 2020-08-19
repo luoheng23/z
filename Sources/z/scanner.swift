@@ -10,7 +10,7 @@ struct ScanRes {
 
 }
 
-class Scanner {
+class ZScanner {
 
   public typealias SIndex = String.UnicodeScalarView.Index
   public typealias SString = String
@@ -277,58 +277,65 @@ class Scanner {
     incLineNum()
   }
 
+  func constructScanRes(_ tok: Token, _ str: String, _ count: Int = 0) -> ScanRes {
+    pos = index(pos: pos, after: count)
+    return ScanRes(tok, str)
+  }
+
   func scan() -> ScanRes {
     if isAtEnd {
-      return ScanRes(.eof, "")
+      return constructScanRes(.eof, "")
     }
+
     if let c = peek() {
       if c.isLetter() {
         let n = name()!
         if Token.isKeyword(n) {
-          return ScanRes(Token.keyToToken(n)!, "")
+          return constructScanRes(Token.keyToToken(n)!, "")
         }
-        return ScanRes(.name, n)
+        return constructScanRes(.name, n)
       }
       if c.isDigit() {
         let num = number()!
-        return ScanRes(.number, num)
+        return constructScanRes(.number, num)
       }
       switch c {
       case "+", "-", "*", "/", "%", "^", "!", "=":
         if let d = nextPeek(), d == "=" {
-          nextPos()
-          return ScanRes(Token(rawValue: String([c, d]))!, "")
+          return constructScanRes(Token(rawValue: String([c,d]))!, "", 2)
         }
-        return ScanRes(Token(rawValue: String(c))!, "")
-      case "?", "(", ")", "[", "]", "{", "}", ",", ";", "@", "#":
-        return ScanRes(Token(rawValue: String(c))!, "")
+        return constructScanRes(Token(rawValue: String(c))!, "", 1)
+      case "?", "(", ")", "[", "]", "{", "}", ",", ";", "@", "#", ":":
+        return constructScanRes(Token(rawValue: String(c))!, "", 1)
       case "\r":
         if let d = nextPeek(), d == "\n" {
-          nextPos()
           lastNewLinePos = pos
-          return ScanRes(.nl, "")
+          return constructScanRes(.nl, "", 2)
         }
+        return constructScanRes(.nl, "", 1)
       case "\n":
         lastNewLinePos = pos
-        return ScanRes(.nl, "")
+        return constructScanRes(.nl, "", 1)
+      case "\t", " ":
+        return constructScanRes(Token(rawValue: String(c))!, "", 1)
       case ".":
         if expect(want: "...", startPos: pos) {
-          pos = index(pos: pos, after: 3)
-          return ScanRes(.dotdot, "")
+          return constructScanRes(.dotdot, "", 3)
         }
-        return ScanRes(.dot, "")
+        return constructScanRes(.dot, "", 1)
       case ">", "<", "&", "|":
         if let d = nextPeek(), d == "=" || c == d {
-          return ScanRes(Token(rawValue: String([c, d]))!, "")
+          return constructScanRes(Token(rawValue: String([c, d]))!, "", 2)
         }
+        return constructScanRes(Token(rawValue: String(c))!, "", 1)
       case "\"":
         let str = string()!
-        return ScanRes(.str, str)
+        return constructScanRes(.str, str)
       default:
-        return ScanRes(.eof, "")
+        return constructScanRes(.eof, "")
       }
     }
-    return ScanRes(.eof, "")
+    return constructScanRes(.eof, "")
   }
 
   func error(_ str: String) {

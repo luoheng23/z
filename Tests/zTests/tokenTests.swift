@@ -10,7 +10,7 @@ import XCTest
 
 @testable import z
 
-final class tokenTests: XCTestCase {
+final class TokenTests: XCTestCase {
 
   func testBuildKeys() {
     let keys = Token.buildKeys()
