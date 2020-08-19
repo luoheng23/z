@@ -9,7 +9,6 @@ public enum Token: String {
   case name = "name"  // user
   case number = "number"  // 123
   case str = "str"  // 'foo'
-  case str_inter  // 'name=$user.name'
   case chartoken = "char"  // `A`
   case plus = "+"
   case minus = "-"
@@ -18,8 +17,6 @@ public enum Token: String {
   case mod = "%"
   case xor = "^"  // ^
   case pipe = "|"  // |
-  case inc = "++"  // ++
-  case dec = "--"  // --
   case and = "&&"  // &&
   case logical_or = "||"
   case not = "!"
@@ -284,7 +281,7 @@ extension Character {
     return Character.hexDigit.contains(self)
   }
 
-  func isDigit(_ prefixStr: String) -> Bool {
+  func isDigit(_ prefixStr: String = "") -> Bool {
     switch (prefixStr) {
     case Character.prefixBin:
       return isBinDigit()

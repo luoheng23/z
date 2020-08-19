@@ -57,9 +57,41 @@ final class scannerTests: XCTestCase {
 
         }
     }
+
+    func testString() {
+        let str = """
+        "hello world"
+        "hello {this is good} day"
+        "this {this is good} {good}"
+        """
+        let answer = str.split(separator: "\n")
+        let scanner = Scanner(str)
+        for word in answer {
+            let string = scanner.string() ?? ""
+            scanner.skipWhitespace()
+            XCTAssert(word == string, "Failed scanner string test: \(word) != \(string), \(word.count) != \(name.count)")
+        }
+    }
+
+    func testScan() {
+        let str = """
+        const a = 10
+        var b = 20
+        print(a + b)
+        """
+        let answer = ["const", "a", "=", "10", "var", "b", "=", "20", "print", "a", "+", "b"]
+        let scanner = Scanner(str)
+        for word in answer {
+            let name = scanner.scan().lit
+            scanner.skipWhitespace()
+            XCTAssert(word == name, "Failed scanner scan test: \(word) != \(name), \(word.count) != \(name.count)")
+        }
+    }
+
     static var allTests = [
         ("testInitScanner", testInitScanner),
         ("testName", testName),
         ("testNumber", testNumber),
+        ("testString", testString),
     ]
 }
