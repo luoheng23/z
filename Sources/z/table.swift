@@ -30,7 +30,7 @@ class Table {
         ]
     }
 
-    func getValue(_ from: String) {
+    func getValue(_ from: String) -> String {
         return reflections[from] ?? from
     }
 }
