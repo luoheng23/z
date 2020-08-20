@@ -8,25 +8,22 @@ public enum Token: String {
   case comment = "#"
   case name = "name"  // user
   case number = "number"  // 123
-  case str = "str"  // 'foo'
+  case str = "string"  // 'foo'
   case chartoken = "char"  // `A`
   case plus = "+"
   case minus = "-"
   case mul = "*"
   case div = "/"
   case mod = "%"
-  case xor = "^"  // ^
-  case pipe = "|"  // |
-  case and = "&&"  // &&
-  case logical_or = "||"
-  case not = "!"
+  case pow = "**"
+  case xor = "^"
+  case pipe = "|"
   case bit_not = "~"
   case question = "?"
   case comma = ","
   case semicolon = ";"
   case colon = ":"
   case amp = "&"
-  case dollar = "$"
   case left_shift = "<<"
   case righ_shift = ">>"
   case at = "@"
@@ -35,6 +32,7 @@ public enum Token: String {
   case minus_assign = "-="  // -=
   case div_assign = "/="
   case mult_assign = "*="
+  case pow_assign = "**="
   case xor_assign = "^="
   case mod_assign = "%="
   case or_assign = "|="
@@ -48,7 +46,6 @@ public enum Token: String {
   case lsbr = "["
   case rsbr = "]"
 
-  case sinQuote = "'"
   case douQuote = "\""
 
   case eq = "=="
@@ -64,20 +61,21 @@ public enum Token: String {
   case nl2 = "\r"
 
   case dot = "."
-  case dotdot = "..."
+  case range = "..."
+  case halfRange = "..<"
 
-  case key_is = "is"
-  case key_atomic = "atomic"
+  case key_and = "and"
   case key_break = "break"
   case key_case = "case"
   case key_const = "const"
-  case key_var = "var"
   case key_continue = "continue"
   case key_default = "default"
   case key_defer = "defer"
   case key_else = "else"
   case key_enum = "enum"
+  case key_impl = "impl"
   case key_false = "false"
+  case key_fallthrough = "fallthrough"
   case key_for = "for"
   case key_func = "fn"
   case key_go = "go"
@@ -85,15 +83,19 @@ public enum Token: String {
   case key_import = "import"
   case key_in = "in"
   case key_interface = "interface"
-  case key_switch = "switch"
+  case key_is = "is"
   case key_mut = "mut"
-  case key_none = "nil"
-  case key_return = "return"
-  case key_struct = "struct"
-  case key_true = "true"
-  case key_type = "type"
+  case key_nil = "nil"
+  case key_not = "not"
+  case key_logical_or = "or"
   case key_pub = "pub"
   case key_static = "static"
+  case key_struct = "struct"
+  case key_switch = "switch"
+  case key_return = "return"
+  case key_true = "true"
+  case key_type = "type"
+  case key_var = "var"
 
   // buildKeys genereates a map with keywords' string values:
   // Keywords['return'] == .key_return
@@ -106,18 +108,18 @@ public enum Token: String {
   }
 
   static let keywords: [Token] = [
-    .key_is,
-    .key_atomic,
+    .key_and,
     .key_break,
     .key_case,
     .key_const,
-    .key_var,
     .key_continue,
     .key_default,
     .key_defer,
     .key_else,
     .key_enum,
+    .key_impl,
     .key_false,
+    .key_fallthrough,
     .key_for,
     .key_func,
     .key_go,
@@ -125,36 +127,45 @@ public enum Token: String {
     .key_import,
     .key_in,
     .key_interface,
-    .key_switch,
+    .key_is,
     .key_mut,
-    .key_none,
-    .key_return,
-    .key_struct,
-    .key_true,
-    .key_type,
+    .key_nil,
+    .key_not,
     .key_pub,
     .key_static,
+    .key_struct,
+    .key_switch,
+    .key_return,
+    .key_true,
+    .key_type,
+    .key_var,
   ]
 
   static let KEYWORDS = buildKeys()
 
   static let Decls: [Token] = [
     .key_enum,
+    .key_impl,
     .key_interface,
     .key_func,
     .key_struct,
     .key_type,
     .key_const,
     .key_var,
-    .key_mut,
-    .key_pub,
   ]
 
   static let Assigns: [Token] = [
-    .assign, .plus_assign, .minus_assign,
-    .mult_assign, .div_assign, .xor_assign,
+    .assign,
+    .plus_assign,
+    .minus_assign,
+    .mult_assign,
+    .div_assign,
+    .xor_assign,
     .mod_assign,
-    .or_assign, .and_assign, .righ_shift_assign,
+    .or_assign,
+    .and_assign,
+    .righ_shift_assign,
+    .pow_assign,
     .left_shift_assign,
   ]
 
@@ -183,13 +194,12 @@ public enum Token: String {
     .minus,
     .mul,
     .div,
+    .pow,
     .mod,
     .xor,
     .pipe,
-    .not,
     .bit_not,
     .amp,
-    .dollar,
     .at,
     .assign,
     .gt,

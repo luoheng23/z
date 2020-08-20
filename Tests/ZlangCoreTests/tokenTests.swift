@@ -8,7 +8,7 @@
 
 import XCTest
 
-@testable import z
+@testable import ZlangCore
 
 final class TokenTests: XCTestCase {
 
@@ -23,7 +23,7 @@ final class TokenTests: XCTestCase {
   }
 
   func testAssign() {
-    let assign = ["=", "+=", "-=", "*=", "/=", "^=", "%=", "|=", "&=", ">>=", "<<="]
+    let assign = ["=", "+=", "-=", "*=", "**=", "/=", "^=", "%=", "|=", "&=", ">>=", "<<="]
 
     for ass in assign {
       XCTAssert(Token(rawValue: ass)?.isAssign() != nil, "Failed to test assign: " + ass)
@@ -32,7 +32,7 @@ final class TokenTests: XCTestCase {
   }
 
   func testDecl() {
-    let decl = ["enum", "interface", "fn", "struct", "const", "type", "var", "mut", "pub"]
+    let decl = ["enum", "interface", "fn", "struct", "const", "type", "var", "impl"]
     for dec in decl {
       XCTAssert(Token(rawValue: dec)?.isDecl() != nil, "Failed to test decl: " + dec)
     }

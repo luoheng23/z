@@ -1,7 +1,7 @@
 import XCTest
 
-import zTests
+import ZlangCoreTests
 
 var tests = [XCTestCaseEntry]()
-tests += zTests.allTests()
+tests += ZlangCoreTests.allTests()
 XCTMain(tests)

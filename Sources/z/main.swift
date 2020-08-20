@@ -1,5 +1,6 @@
 
 import Foundation
+import ZlangCore
 
 func main() {
     if CommandLine.argc <= 1 {

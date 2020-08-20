@@ -7,11 +7,11 @@
 //
 
 import XCTest
-
-@testable import z
 import Files
 
-final class ZScannerTests: XCTestCase {
+@testable import ZlangCore
+
+final class ScannerTests: XCTestCase {
 
     private var folder: Folder!
 
@@ -31,14 +31,14 @@ final class ZScannerTests: XCTestCase {
         XCTAssertFalse(folder.containsFile(named: filename))
         let file = try? folder.createFile(named: filename)
         XCTAssert(file != nil && file!.name == filename)
-        let scanner = ZScanner(filePath: folder.path + filename)
+        let scanner = Scanner(filePath: folder.path + filename)
         XCTAssert(scanner.filePath == folder.path + filename, "init scanner filename failed.")
     }
 
     func testName() {
         let str = "name hello good th 恶魔"
         let answer = str.split(separator: " ")
-        let scanner = ZScanner(str)
+        let scanner = Scanner(str)
         for word in answer {
             let name = scanner.name() ?? ""
             scanner.skipWhitespace()
@@ -49,7 +49,7 @@ final class ZScannerTests: XCTestCase {
     func testNumber() {
         let str = "123 123.123 456.456 12e10 12.2e+10 12.2e-10 1_2_2_3.3_4_4_5e10 0o7 0xF 0b0101"
         let answer = str.split(separator: " ")
-        let scanner = ZScanner(str)
+        let scanner = Scanner(str)
         for word in answer {
             let number = scanner.number() ?? ""
             scanner.skipWhitespace()
@@ -65,7 +65,7 @@ final class ZScannerTests: XCTestCase {
         "this {this is good} {good}"
         """
         let answer = str.split(separator: "\n")
-        let scanner = ZScanner(str)
+        let scanner = Scanner(str)
         for word in answer {
             let string = scanner.string() ?? ""
             scanner.skipWhitespace()
@@ -80,7 +80,7 @@ final class ZScannerTests: XCTestCase {
         print(a + b)
         """
         let answer = ["const", "a", "=", "10", "var", "b", "=", "20", "print", "a", "+", "b"]
-        let scanner = ZScanner(str)
+        let scanner = Scanner(str)
         for word in answer {
             let name = scanner.scan().lit
             scanner.skipWhitespace()

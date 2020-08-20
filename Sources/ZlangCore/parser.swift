@@ -1,20 +1,20 @@
 
 import Files
 
-class Parser {
-    var scan: ZScanner
-    var filePath: String
-    var table: Table
+public class Parser {
+    var scan: Scanner
+    public var filePath: String
+    var table: ZTable
 
-    init(_ filename: String) {
-        scan = ZScanner(filePath: filename)
+    public init(_ filename: String) {
+        scan = Scanner(filePath: filename)
         filePath = filename.split(separator: ".")[0] + ".swift"
-        table = Table()
+        table = ZTable()
         table.initTable()
     }
 
 
-    func parseToFile() {
+    public func parseToFile() {
         var tok: ScanRes
         if let file = try? File(path: filePath) {
             _ = try? file.write("")

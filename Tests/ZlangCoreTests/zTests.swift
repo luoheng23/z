@@ -1,5 +1,5 @@
 import XCTest
-@testable import z
+@testable import ZlangCore
 
 final class zTests: XCTestCase {
     func testExample() {

@@ -1,5 +1,5 @@
 
-class Table {
+class ZTable {
     public var reflections: [String: String] = [:]
 
     func register(_ from: String, _ to: String) {
