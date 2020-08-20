@@ -13,30 +13,30 @@ import XCTest
 final class TokenTests: XCTestCase {
 
   func testBuildKeys() {
-    let keys = Token.buildKeys()
+    let keys = Kind.buildKeys()
 
     for (key, value) in keys {
       XCTAssert(key == value.rawValue, "Failed to validate token key: " + key)
     }
     XCTAssert(
-      Set<Token>(Token.keywords) == Set<Token>(keys.values), "Failed to validate token keywords")
+      Set<Kind>(Kind.keywords) == Set<Kind>(keys.values), "Failed to validate token keywords")
   }
 
   func testAssign() {
     let assign = ["=", "+=", "-=", "*=", "**=", "/=", "^=", "%=", "|=", "&=", ">>=", "<<="]
 
     for ass in assign {
-      XCTAssert(Token(rawValue: ass)?.isAssign() != nil, "Failed to test assign: " + ass)
+      XCTAssert(Kind(rawValue: ass)?.isAssign() != nil, "Failed to test assign: " + ass)
     }
-    XCTAssert(Token.Assigns.count == assign.count, "Failed to test assign length.")
+    XCTAssert(Kind.Assigns.count == assign.count, "Failed to test assign length.")
   }
 
   func testDecl() {
     let decl = ["enum", "interface", "fn", "struct", "const", "type", "var", "impl"]
     for dec in decl {
-      XCTAssert(Token(rawValue: dec)?.isDecl() != nil, "Failed to test decl: " + dec)
+      XCTAssert(Kind(rawValue: dec)?.isDecl() != nil, "Failed to test decl: " + dec)
     }
-    XCTAssert(Token.Decls.count == decl.count, "Failed to test decl length.")
+    XCTAssert(Kind.Decls.count == decl.count, "Failed to test decl length.")
   }
 
   static var allTests = [

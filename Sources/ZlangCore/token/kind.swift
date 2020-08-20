@@ -1,14 +1,11 @@
-// Copyright (c) 2019 Alexander Medvednikov. All rights reserved.
-// Use of this source code is governed by an MIT license
-// that can be found in the LICENSE file.
 
-public enum Token: String {
-  case none = ""
+public enum Kind: String {
+  case unknown = ""
   case eof = "eof"
   case comment = "#"
   case name = "name"  // user
   case number = "number"  // 123
-  case str = "string"  // 'foo'
+  case string = "string"  // 'foo'
   case chartoken = "char"  // `A`
   case plus = "+"
   case minus = "-"
@@ -25,7 +22,7 @@ public enum Token: String {
   case colon = ":"
   case amp = "&"
   case left_shift = "<<"
-  case righ_shift = ">>"
+  case right_shift = ">>"
   case at = "@"
   case assign = "="
   case plus_assign = "+="  // +=
@@ -37,7 +34,7 @@ public enum Token: String {
   case mod_assign = "%="
   case or_assign = "|="
   case and_assign = "&="
-  case righ_shift_assign = ">>="
+  case right_shift_assign = ">>="
   case left_shift_assign = "<<="
   case lcbr = "{"
   case rcbr = "}"
@@ -82,12 +79,14 @@ public enum Token: String {
   case key_if = "if"
   case key_import = "import"
   case key_in = "in"
+  case key_not_in = "not in"
   case key_interface = "interface"
   case key_is = "is"
+  case key_is_not = "is not"
   case key_mut = "mut"
   case key_nil = "nil"
   case key_not = "not"
-  case key_logical_or = "or"
+  case key_or = "or"
   case key_pub = "pub"
   case key_static = "static"
   case key_struct = "struct"
@@ -99,15 +98,15 @@ public enum Token: String {
 
   // buildKeys genereates a map with keywords' string values:
   // Keywords['return'] == .key_return
-  static func buildKeys() -> [String: Token] {
-    var res = [String: Token]()
-    for c in Token.keywords {
+  static func buildKeys() -> [String: Kind] {
+    var res = [String: Kind]()
+    for c in Kind.keywords {
       res[c.rawValue] = c
     }
     return res
   }
 
-  static let keywords: [Token] = [
+  static let keywords: [Kind] = [
     .key_and,
     .key_break,
     .key_case,
@@ -132,6 +131,7 @@ public enum Token: String {
     .key_nil,
     .key_not,
     .key_pub,
+    .key_or,
     .key_static,
     .key_struct,
     .key_switch,
@@ -143,7 +143,7 @@ public enum Token: String {
 
   static let KEYWORDS = buildKeys()
 
-  static let Decls: [Token] = [
+  static let Decls: [Kind] = [
     .key_enum,
     .key_impl,
     .key_interface,
@@ -154,7 +154,7 @@ public enum Token: String {
     .key_var,
   ]
 
-  static let Assigns: [Token] = [
+  static let Assigns: [Kind] = [
     .assign,
     .plus_assign,
     .minus_assign,
@@ -164,12 +164,12 @@ public enum Token: String {
     .mod_assign,
     .or_assign,
     .and_assign,
-    .righ_shift_assign,
+    .right_shift_assign,
     .pow_assign,
     .left_shift_assign,
   ]
 
-  static let Splits: [Token] = [
+  static let Splits: [Kind] = [
     .lcbr,
     .rcbr,
     .lpar,
@@ -182,14 +182,14 @@ public enum Token: String {
     .colon,
   ]
 
-  static let Whitespace: [Token] = [
+  static let Whitespace: [Kind] = [
     .space,
     .tab,
     .nl,
     .nl2,
   ]
 
-  static let Operators: [Token] = [
+  static let Operators: [Kind] = [
     .plus,
     .minus,
     .mul,
@@ -206,106 +206,45 @@ public enum Token: String {
     .lt,
   ]
 
-  static func keyToToken(_ key: String) -> Token? {
+  static func keyToKind(_ key: String) -> Kind? {
     return KEYWORDS[key]
   }
 
   static func isKeyword(_ key: String) -> Bool {
-    return keyToToken(key) != nil
+    return keyToKind(key) != nil
   }
 
-  func isKeyword() -> Bool {
-    return Token.isKeyword(self.rawValue)
-  }
-
-  func string() -> String {
+  func str() -> String {
     return self.rawValue
   }
 
   static func isDecl(_ str: String) -> Bool {
-    return Token.Decls.contains(Token(rawValue: str) ?? .none)
+    return Kind.Decls.contains(Kind(rawValue: str) ?? .unknown)
+  }
+
+
+  static func isAssign(_ str: String) -> Bool {
+    return Kind.Assigns.contains(Kind(rawValue: str) ?? .unknown)
   }
 
   func isDecl() -> Bool {
-    return Token.Decls.contains(self)
-  }
-
-  static func isAssign(_ str: String) -> Bool {
-    return Token.Assigns.contains(Token(rawValue: str) ?? .none)
+    return Kind.Decls.contains(self)
   }
 
   func isAssign() -> Bool {
-    return Token.Assigns.contains(self)
-  }
-}
-
-extension Character {
-  static let binDigit: Set<Character> = ["0", "1"]
-  static let octDigit: Set<Character> = binDigit.union(["2", "3", "4", "5", "6", "7"])
-  static let decDigit: Set<Character> = octDigit.union(["8", "9"])
-  static let hexDigit: Set<Character> = decDigit.union(["A", "B", "C", "D", "E", "F", "a", "b", "c", "d", "e", "f"])
-
-  static let prefixHex = "0x"
-  static let prefixOct = "0o"
-  static let prefixBin = "0b"
-  static let prefixDec = ""
-  static let underscore: Character = "_"
-  static let hexExp = "p"
-  static let octExp = "p"
-  static let binExp = "p"
-  static let decExp = "e"
-
-  func isWhitespace() -> Bool {
-    return Token.Whitespace.contains(Token(rawValue: String(self)) ?? .none)
+    return Kind.Assigns.contains(self)
   }
 
-  func isSplits() -> Bool {
-    return Token.Splits.contains(Token(rawValue: String(self)) ?? .none)
+  func isFunction() -> Bool {
+    return isKind(.key_func)
   }
 
-  func isOperator() -> Bool {
-    return Token.Operators.contains(Token(rawValue: String(self)) ?? .none)
+  func isKind(_ kind: Kind) -> Bool {
+    return self == kind
   }
 
-  func isNewLine() -> Bool {
-    return [Token.nl, Token.nl2].contains(Token(rawValue: String(self)) ?? .none)
-  }
-
-  func isLetter() -> Bool {
-    return !isWhitespace() && !isSplits() && !isOperator()
-  }
-
-  func isBinDigit() -> Bool {
-    return Character.binDigit.contains(self)
-  }
-
-  func isOctDigit() -> Bool {
-    return Character.octDigit.contains(self)
-  }
-
-  func isDecDigit() -> Bool {
-    return Character.decDigit.contains(self)
-  }
-
-  func isHexDigit() -> Bool {
-    return Character.hexDigit.contains(self)
-  }
-
-  func isDigit(_ prefixStr: String = "") -> Bool {
-    switch (prefixStr) {
-    case Character.prefixBin:
-      return isBinDigit()
-    case Character.prefixHex:
-      return isHexDigit()
-    case Character.prefixOct:
-      return isOctDigit()
-    default:
-      return isDecDigit()
-    }
-  }
-
-  func isUnderScore() -> Bool {
-    return self == Character.underscore
+  func isNotKind(_ kind: Kind) -> Bool {
+    return !isKind(kind)
   }
 
 }

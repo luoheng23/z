@@ -1,13 +1,13 @@
 
 class Table {
     var typeDict: [String: String]
-    var consts: []
+    var consts: Array<String>
     
     func register(_ from: String, _ to: String) {
         typeDict[from] = to
     }
 
-    func initTable() {
+    init() {
         typeDict = [
             "const": "let",
             "fn": "func",
@@ -29,6 +29,7 @@ class Table {
             "interface": "protocol",
             "mut": "mutating",
         ]
+        consts = []
     }
 
     func getValue(_ from: String) -> String {

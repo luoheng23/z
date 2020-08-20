@@ -17,6 +17,7 @@ class Scanner {
 
   public var text: SString
   public var pos: SIndex
+  public var posIndex: Int
 
   public var startIndex: SIndex {
     return self.text.startIndex
@@ -34,10 +35,10 @@ class Scanner {
     return self.pos == self.startIndex
   }
 
-  var filePath: String = ""
-  var newlineNum: Int = 0
-  var columnNum: Int = 0
   let count: Int
+  var filePath: String = ""
+  var lineNr: Int = 0
+  var columnNum: Int = 0
   var lastNewLinePos: SIndex
   var insideString: Bool = false
   var interStart: Bool = false
@@ -45,9 +46,10 @@ class Scanner {
   var debug: Bool = false
   var lineComment: String = ""
 
+  var prevTok: Token?
+  var tokenNum: Int = 0
   var quote = "\""
   var fileLines: [String] = []
-  var prevTok: Token?
   var fnName: String = ""
 
   convenience init(filePath: String) {
@@ -62,9 +64,17 @@ class Scanner {
 
   init(_ string: String) {
     self.pos = string.startIndex
+    self.posIndex = 0
     self.lastNewLinePos = string.startIndex
     self.text = string
     self.count = string.count
+  }
+
+  func newToken(_ kind: Kind, _ lit: String, _ len: Int) -> Token {
+    let pos = Position(count: len, lineNr: lineNr + 1, pos: self.posIndex - len + 1)
+    let idx = tokenNum
+    tokenNum += 1
+    return Token(kind: kind, lit: lit, pos: pos, tidx: idx)
   }
 
   func nextChar() -> Character? {
@@ -74,6 +84,7 @@ class Scanner {
 
   func nextPos() {
     pos = text.index(after: pos)
+    posIndex += 1
     columnNum += 1
   }
 
@@ -93,6 +104,7 @@ class Scanner {
   }
 
   public func index(pos: SIndex, after: Int) -> SIndex {
+    posIndex += after
     if let res = text.index(pos, offsetBy: after, limitedBy: endIndex) {
       return res
     }
@@ -116,6 +128,19 @@ class Scanner {
     return getStr(start)
   }
 
+  func funcName() -> String? {
+    if isAtEnd {
+      return nil
+    }
+    skipWhitespace()
+    let start = pos
+    while let char = nextChar(), char.isOperator() {}
+    if start == pos {
+      return nil
+    }
+    return getStr(start)
+  }
+
   func skipWhitespace() {
     while let c = peek(), c.isWhitespace() {
       if c.isNewLine() && !expect(want: "\r\n", startPos: index(pos: pos, after: -1)) {
@@ -127,7 +152,7 @@ class Scanner {
 
   func incLineNum() {
     lastNewLinePos = pos
-    newlineNum += 1
+    lineNr += 1
     columnNum = 0
   }
 
@@ -259,7 +284,7 @@ class Scanner {
         }
       }
       if let c = peek(), c == "{" && countSymBefore(before: pos, symbol: slash) % 2 == 0 {
-        consumeTillSymbol(endChar: [Token.rcbr.rawValue, quote])
+        consumeTillSymbol(endChar: [Kind.rcbr.rawValue, quote])
       }
 
       nextPos()
@@ -278,9 +303,9 @@ class Scanner {
     nextPos()
   }
 
-  func constructScanRes(_ tok: Token, _ str: String, _ count: Int = 0) -> ScanRes {
+  func constructToken(_ kind: Kind, _ lit: String, _ len: Int = 0, _ count: Int = 0) -> Token {
     pos = index(pos: pos, after: count)
-    return ScanRes(tok, str)
+    return newToken(kind, lit, len)
   }
 
   func comment() -> String? {
@@ -293,72 +318,82 @@ class Scanner {
     return str
   }
 
-  func scan() -> ScanRes {
+  func scan() -> Token {
+    prevTok = scanBasic()
+    return prevTok!
+  }
+
+  func scanBasic() -> Token {
     if isAtEnd {
-      return constructScanRes(.eof, "")
+      return constructToken(.eof, "")
     }
 
     if let c = peek() {
       if c.isLetter() {
         let n = name()!
-        if Token.isKeyword(n) {
-          return constructScanRes(Token.keyToToken(n)!, "")
+        if Kind.isKeyword(n) {
+          return constructToken(Kind.keyToKind(n)!, "", n.count)
         }
-        return constructScanRes(.name, n)
+        return constructToken(.name, n, n.count)
       }
       if c.isDigit() {
         let num = number()!
-        return constructScanRes(.number, num)
+        return constructToken(.number, num, num.count)
       }
-      switch c {
+      if prevTok != nil && prevTok!.isFunction() && c.isOperator() {
+        let n = funcName()!
+        return constructToken(.name, n, n.count)
+      }
+    switch c {
       case "+", "-", "*", "/", "%", "^", "=":
         if let d = nextPeek(), d == "=" || c == "*" && d == "*" {
-          return constructScanRes(Token(rawValue: String([c,d]))!, "", 2)
+          return constructToken(Kind(rawValue: String([c,d]))!, "", 2, 2)
         }
-        return constructScanRes(Token(rawValue: String(c))!, "", 1)
+        return constructToken(Kind(rawValue: String(c))!, "", 1, 1)
       case "?", "(", ")", "[", "]", "{", "}", ",", ";", "@", ":":
-        return constructScanRes(Token(rawValue: String(c))!, "", 1)
+        return constructToken(Kind(rawValue: String(c))!, "", 1, 1)
       case "#":
         let cmt = comment()!
-        return constructScanRes(.comment, cmt)
+        return constructToken(.comment, cmt, cmt.count)
       case "\r":
         if let d = nextPeek(), d == "\n" {
           lastNewLinePos = pos
-          return constructScanRes(.nl, "", 2)
+          return constructToken(.nl, "", 2, 2)
         }
-        return constructScanRes(.nl, "", 1)
+        return constructToken(.nl, "", 1, 1)
       case "\n":
         lastNewLinePos = pos
-        return constructScanRes(.nl, "", 1)
+        return constructToken(.nl, "", 1, 1)
       case "\t", " ":
-        return constructScanRes(Token(rawValue: String(c))!, "", 1)
+        return constructToken(Kind(rawValue: String(c))!, "", 1, 1)
       case ".":
         if expect(want: "...", startPos: pos) {
-          return constructScanRes(.range, "", 3)
+          return constructToken(.range, "", 3, 3)
         }
         if expect(want: "..<", startPos: pos) {
-          return constructScanRes(.halfRange, "", 3)
+          return constructToken(.halfRange, "", 3, 3)
         }
-        return constructScanRes(.dot, "", 1)
+        return constructToken(.dot, "", 1, 1)
       case ">", "<":
         if let d = nextPeek(), d == "=" || c == d {
-          return constructScanRes(Token(rawValue: String([c, d]))!, "", 2)
+          return constructToken(Kind(rawValue: String([c, d]))!, "", 2, 2)
         }
-        return constructScanRes(Token(rawValue: String(c))!, "", 1)
+        return constructToken(Kind(rawValue: String(c))!, "", 1, 1)
       case "&", "|":
         if let d = nextPeek(), d == "=" {
-          return constructScanRes(Token(rawValue: String([c, d]))!, "", 2)
+          return constructToken(Kind(rawValue: String([c, d]))!, "", 2, 2)
         }
-        return constructScanRes(Token(rawValue: String(c))!, "", 1)
+        return constructToken(Kind(rawValue: String(c))!, "", 1, 1)
       case "\"":
         let str = string()!
-        return constructScanRes(.str, str)
+        return constructToken(.string, str, str.count)
       default:
-        return constructScanRes(.eof, "")
+        return constructToken(.unknown, "")
       }
     }
-    return constructScanRes(.eof, "")
+    return constructToken(.unknown, "")
   }
+
 
   func error(_ str: String) {
     fatalError(str)
