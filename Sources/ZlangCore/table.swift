@@ -1,13 +1,14 @@
 
-class ZTable {
-    public var reflections: [String: String] = [:]
-
+class Table {
+    var typeDict: [String: String]
+    var consts: []
+    
     func register(_ from: String, _ to: String) {
-        reflections[from] = to
+        typeDict[from] = to
     }
 
     func initTable() {
-        reflections = [
+        typeDict = [
             "const": "let",
             "fn": "func",
             "int": "Int",
@@ -31,6 +32,6 @@ class ZTable {
     }
 
     func getValue(_ from: String) -> String {
-        return reflections[from] ?? from
+        return typeDict[from] ?? from
     }
 }

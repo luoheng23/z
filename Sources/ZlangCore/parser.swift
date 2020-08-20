@@ -4,12 +4,12 @@ import Files
 public class Parser {
     var scan: Scanner
     public var filePath: String
-    var table: ZTable
+    var table: Table
 
     public init(_ filename: String) {
         scan = Scanner(filePath: filename)
         filePath = filename.split(separator: ".")[0] + ".swift"
-        table = ZTable()
+        table = Table()
         table.initTable()
     }
 
