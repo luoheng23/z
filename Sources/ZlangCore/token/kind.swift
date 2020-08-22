@@ -43,7 +43,7 @@ public enum Kind: String {
   case lsbr = "["
   case rsbr = "]"
 
-  case douQuote = "\""
+  case quote = "\""
 
   case eq = "=="
   case ne = "!="
@@ -180,6 +180,7 @@ public enum Kind: String {
     .comma,
     .semicolon,
     .colon,
+    .quote,
   ]
 
   static let Whitespace: [Kind] = [
@@ -206,12 +207,12 @@ public enum Kind: String {
     .lt,
   ]
 
-  static func keyToKind(_ key: String) -> Kind? {
-    return KEYWORDS[key]
+  static func keyToKind(_ key: String) -> Kind {
+    return KEYWORDS[key] ?? .unknown
   }
 
   static func isKeyword(_ key: String) -> Bool {
-    return keyToKind(key) != nil
+    return keyToKind(key) != .unknown
   }
 
   func str() -> String {
@@ -219,12 +220,20 @@ public enum Kind: String {
   }
 
   static func isDecl(_ str: String) -> Bool {
-    return Kind.Decls.contains(Kind(rawValue: str) ?? .unknown)
+    return Kind.Decls.contains(getKind(str))
+  }
+
+  static func getKind(_ rawValue: String) -> Kind {
+    return Kind(rawValue: rawValue) ?? .unknown
+  }
+
+  static func getKind(_ chars: Character...) -> Kind {
+    return getKind(String(chars))
   }
 
 
   static func isAssign(_ str: String) -> Bool {
-    return Kind.Assigns.contains(Kind(rawValue: str) ?? .unknown)
+    return Assigns.contains(getKind(str))
   }
 
   func isDecl() -> Bool {

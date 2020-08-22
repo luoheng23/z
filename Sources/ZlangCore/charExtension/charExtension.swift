@@ -17,23 +17,27 @@ extension Character {
   static let decExp = "e"
 
   func isWhitespace() -> Bool {
-    return Kind.Whitespace.contains(Kind(rawValue: String(self)) ?? .unknown)
+    return Kind.Whitespace.contains(Kind.getKind(self))
   }
 
   func isSplits() -> Bool {
-    return Kind.Splits.contains(Kind(rawValue: String(self)) ?? .unknown)
+    return Kind.Splits.contains(Kind.getKind(self))
   }
 
   func isOperator() -> Bool {
-    return Kind.Operators.contains(Kind(rawValue: String(self)) ?? .unknown)
+    return Kind.Operators.contains(Kind.getKind(self))
+  }
+
+  func isComment() -> Bool {
+    return .comment == Kind.getKind(self)
   }
 
   func isNewLine() -> Bool {
-    return [Kind.nl, Kind.nl2].contains(Kind(rawValue: String(self)) ?? .unknown)
+    return [Kind.nl, Kind.nl2].contains(Kind.getKind(self))
   }
 
   func isLetter() -> Bool {
-    return !isWhitespace() && !isSplits() && !isOperator()
+    return !isWhitespace() && !isSplits() && !isOperator() && !isComment() && !isDigit()
   }
 
   func isBinDigit() -> Bool {

@@ -1,56 +1,37 @@
 import Files
 
-struct ScanRes {
-  let tok: Token
-  let lit: String
-  init(_ tok: Token, _ lit: String) {
-    self.tok = tok
-    self.lit = lit
-  }
-
-}
-
 class Scanner {
 
-  public typealias SIndex = String.UnicodeScalarView.Index
-  public typealias SString = String
+  var text: SString
+  var pos: SIndex
 
-  public var text: SString
-  public var pos: SIndex
-  public var posIndex: Int
-
-  public var startIndex: SIndex {
+  var startIndex: SIndex {
     return self.text.startIndex
   }
 
-  public var endIndex: SIndex {
+  var endIndex: SIndex {
     return self.text.endIndex
   }
 
-  public var isAtEnd: Bool {
+  var isAtEnd: Bool {
     return self.pos == self.endIndex
   }
 
-  public var isAtBegin: Bool {
+  var isAtBegin: Bool {
     return self.pos == self.startIndex
   }
 
-  let count: Int
-  var filePath: String = ""
-  var lineNr: Int = 0
-  var columnNum: Int = 0
-  var lastNewLinePos: SIndex
-  var insideString: Bool = false
-  var interStart: Bool = false
-  var interEnd: Bool = false
-  var debug: Bool = false
-  var lineComment: String = ""
+  let count: Int // total length of text
+  var filePath: String = "" // filepath
+  var lineNr: Int = 0  // number of newline
+  var columnNum: Int = 0 // current column
+  var lastNewLinePos: SIndex  // last pos of newline
 
-  var prevTok: Token?
-  var tokenNum: Int = 0
-  var quote = "\""
-  var fileLines: [String] = []
-  var fnName: String = ""
+  let slash: Character = "\\"
+
+  var prevTok: Token? // previous token
+  var tokenNum: Int = 0  // current tokens
+
 
   convenience init(filePath: String) {
     if let file = try? (try? File(path: filePath))?.read() {
@@ -64,17 +45,16 @@ class Scanner {
 
   init(_ string: String) {
     self.pos = string.startIndex
-    self.posIndex = 0
     self.lastNewLinePos = string.startIndex
     self.text = string
     self.count = string.count
   }
 
   func newToken(_ kind: Kind, _ lit: String, _ len: Int) -> Token {
-    let pos = Position(count: len, lineNr: lineNr + 1, pos: self.posIndex - len + 1)
-    let idx = tokenNum
+    let pos = Position(length: len, lineNr: lineNr + 1, pos: self.columnNum - len + 1, 
+                  lineBegin: lastNewLinePos)
     tokenNum += 1
-    return Token(kind: kind, lit: lit, pos: pos, tidx: idx)
+    return Token(kind: kind, lit: lit, pos: pos)
   }
 
   func nextChar() -> Character? {
@@ -83,9 +63,10 @@ class Scanner {
   }
 
   func nextPos() {
-    pos = text.index(after: pos)
-    posIndex += 1
-    columnNum += 1
+    if peek() != nil {
+      pos = text.index(after: pos)
+      columnNum += 1
+    }
   }
 
   func peek() -> Character? {
@@ -96,48 +77,46 @@ class Scanner {
   }
 
   func nextPeek() -> Character? {
-    let p = text.index(after: pos)
+    let p = index(pos: pos, after: 1)
     if isAtEnd || p == text.endIndex {
       return nil
     }
     return text[p]
   }
 
-  public func index(pos: SIndex, after: Int) -> SIndex {
-    posIndex += after
+  func next2Peek() -> Character? {
+    let p = index(pos: pos, after: 2)
+    if isAtEnd || p == text.endIndex {
+      return nil
+    }
+    return text[p]
+  }
+  func index(pos: SIndex, after: Int) -> SIndex {
     if let res = text.index(pos, offsetBy: after, limitedBy: endIndex) {
       return res
     }
     return endIndex
   }
 
-  public func _getStr(_ start: SIndex, _ end: SIndex) -> String {
+  func _getStr(_ start: SIndex, _ end: SIndex) -> String {
     return String(text[start..<end])
   }
 
-  public func getStr(_ start: SIndex) -> String {
+  func getStr(_ start: SIndex) -> String {
     return _getStr(start, pos)
   }
 
-  func name() -> String? {
-    if isAtEnd {
-      return nil
-    }
+  func scanName() -> String {
+    skipWhitespace()
     let start = pos
     while let char = nextChar(), char.isLetter() {}
     return getStr(start)
   }
 
-  func funcName() -> String? {
-    if isAtEnd {
-      return nil
-    }
+  func scanFuncName() -> String {
     skipWhitespace()
     let start = pos
     while let char = nextChar(), char.isOperator() {}
-    if start == pos {
-      return nil
-    }
     return getStr(start)
   }
 
@@ -210,10 +189,7 @@ class Scanner {
     return getStr(start)
   }
 
-  func number() -> String? {
-    if isAtEnd {
-      return nil
-    }
+  func scanNumber() -> String {
     if expect(want: Character.prefixHex, startPos: pos) {
       return hexNum()
     }
@@ -236,13 +212,15 @@ class Scanner {
       } else {
         break
       }
+      if isAtBegin {
+        break
+      }
     } while true
     return count
 
   }
 
   func consumeTillSymbol(endChar: [String]) {
-    let slash: Character = "\\"
     consumeLoop: while true {
       nextPos()
       if isAtEnd {
@@ -257,19 +235,14 @@ class Scanner {
     }
   }
 
-  func string() -> String? {
+  func scanString() -> String {
     let start = pos
-    if expect(want: "\"\"\"", startPos: pos) {
-      quote = "\"\"\""
-    }
+    let quote = expect(want: "\"\"\"", startPos: pos) ? "\"\"\"" : "\""
     pos = index(pos: pos, after: 3)
-    insideString = false
-    let slash: Character = "\\"
     while true {
       if isAtEnd {
         break
       }
-
       if expect(want: quote, startPos: pos) && countSymBefore(before: pos, symbol: slash) % 2 == 0 {
         // end of str
         pos = index(pos: pos, after: quote.count)
@@ -283,10 +256,9 @@ class Scanner {
           error("Parse string meets unexpected newline")
         }
       }
-      if let c = peek(), c == "{" && countSymBefore(before: pos, symbol: slash) % 2 == 0 {
-        consumeTillSymbol(endChar: [Kind.rcbr.rawValue, quote])
-      }
-
+      // if let c = peek(), c == "{" && countSymBefore(before: pos, symbol: slash) % 2 == 0 {
+      //   consumeTillSymbol(endChar: [Kind.rcbr.rawValue, quote])
+      // }
       nextPos()
     }
 
@@ -297,25 +269,15 @@ class Scanner {
     consumeTillSymbol(endChar: ["\n"])
   }
 
-  func ignoreLine() {
-    consumeCurrentLine()
-    incLineNum()
-    nextPos()
-  }
-
   func constructToken(_ kind: Kind, _ lit: String, _ len: Int = 0, _ count: Int = 0) -> Token {
     pos = index(pos: pos, after: count)
     return newToken(kind, lit, len)
   }
 
-  func comment() -> String? {
-    if isAtEnd {
-      return nil
-    }
+  func scanComment() -> String {
     let start = pos
     consumeCurrentLine()
-    let str = getStr(start)
-    return str
+    return getStr(start)
   }
 
   func scan() -> Token {
@@ -330,42 +292,47 @@ class Scanner {
 
     if let c = peek() {
       if c.isLetter() {
-        let n = name()!
+        let n = scanName()
         if Kind.isKeyword(n) {
-          return constructToken(Kind.keyToKind(n)!, "", n.count)
+          return constructToken(Kind.keyToKind(n), "", n.count)
         }
         return constructToken(.name, n, n.count)
       }
       if c.isDigit() {
-        let num = number()!
+        let num = scanNumber()
         return constructToken(.number, num, num.count)
       }
       if prevTok != nil && prevTok!.isFunction() && c.isOperator() {
-        let n = funcName()!
+        let n = scanFuncName()
         return constructToken(.name, n, n.count)
       }
     switch c {
       case "+", "-", "*", "/", "%", "^", "=":
-        if let d = nextPeek(), d == "=" || c == "*" && d == "*" {
-          return constructToken(Kind(rawValue: String([c,d]))!, "", 2, 2)
+        if let d = nextPeek() {
+          if c == "*" && d == "*" {
+            if let e = next2Peek(), e == "=" {
+              return constructToken(Kind.getKind(c, d, e), "", 3, 3)
+            }
+            return constructToken(Kind.getKind(c, d), "", 2, 2)
+          }
+          if d == "=" {
+            return constructToken(Kind.getKind(c, d), "", 2, 2)
+          }
         }
-        return constructToken(Kind(rawValue: String(c))!, "", 1, 1)
+        return constructToken(Kind.getKind(c), "", 1, 1)
       case "?", "(", ")", "[", "]", "{", "}", ",", ";", "@", ":":
-        return constructToken(Kind(rawValue: String(c))!, "", 1, 1)
+        return constructToken(Kind.getKind(c), "", 1, 1)
       case "#":
-        let cmt = comment()!
+        let cmt = scanComment()
         return constructToken(.comment, cmt, cmt.count)
-      case "\r":
-        if let d = nextPeek(), d == "\n" {
-          lastNewLinePos = pos
+      case "\r", "\n":
+        incLineNum()
+        if let d = nextPeek(), c == "\r" && d == "\n" {
           return constructToken(.nl, "", 2, 2)
         }
         return constructToken(.nl, "", 1, 1)
-      case "\n":
-        lastNewLinePos = pos
-        return constructToken(.nl, "", 1, 1)
       case "\t", " ":
-        return constructToken(Kind(rawValue: String(c))!, "", 1, 1)
+        return constructToken(Kind.getKind(c), "", 1, 1)
       case ".":
         if expect(want: "...", startPos: pos) {
           return constructToken(.range, "", 3, 3)
@@ -376,16 +343,16 @@ class Scanner {
         return constructToken(.dot, "", 1, 1)
       case ">", "<":
         if let d = nextPeek(), d == "=" || c == d {
-          return constructToken(Kind(rawValue: String([c, d]))!, "", 2, 2)
+          return constructToken(Kind.getKind(c, d), "", 2, 2)
         }
-        return constructToken(Kind(rawValue: String(c))!, "", 1, 1)
+        return constructToken(Kind.getKind(c), "", 1, 1)
       case "&", "|":
         if let d = nextPeek(), d == "=" {
-          return constructToken(Kind(rawValue: String([c, d]))!, "", 2, 2)
+          return constructToken(Kind.getKind(c, d), "", 2, 2)
         }
-        return constructToken(Kind(rawValue: String(c))!, "", 1, 1)
+        return constructToken(Kind.getKind(c), "", 1, 1)
       case "\"":
-        let str = string()!
+        let str = scanString()
         return constructToken(.string, str, str.count)
       default:
         return constructToken(.unknown, "")

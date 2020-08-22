@@ -1,5 +1,10 @@
 
 class Table {
+    var types: [TypeSymbol]
+    var fns: Dictionary<String, Fn>
+    var imports: [String]
+    var modules: [String]
+
     var typeDict: [String: String]
     var consts: Array<String>
     
@@ -30,9 +35,27 @@ class Table {
             "mut": "mutating",
         ]
         consts = []
+        types = []
+        fns = [:]
+        imports = []
+        modules = []
     }
 
     func getValue(_ from: String) -> String {
         return typeDict[from] ?? from
     }
+
+    func findFn(_ name: String) -> Fn? {
+        return self.fns[name]
+    }
+
+    func hasFn(_ name: String) -> Bool {
+        return findFn(name) != nil
+    }
+
+    func registerFn(_ fn: Fn) {
+        self.fns[fn.name] = fn
+    }
+
+    func registerBuiltinTypeSymbols() {}
 }

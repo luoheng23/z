@@ -1,21 +1,32 @@
 
+typealias SIndex = String.UnicodeScalarView.Index
+typealias SString = String
 
-public class Position {
-    public var count: Int
-    public var lineNr: Int
-    public var pos: Int
+class Position {
+    var lineBegin: SIndex
+    var lineNr: Int
+    var pos: Int
+    var length: Int = 0
 
-    public init(count: Int, lineNr: Int, pos: Int) {
-         self.count = count
-         self.lineNr = lineNr
-         self.pos = pos
+    init() {
+        self.lineBegin = "".startIndex
+        self.lineNr = 0
+        self.pos = 0
+        self.length = 0
     }
 
-    public func string() -> String {
-        return "Position(lineNr: \(lineNr), pos: \(pos), length: \(count)"
+    init(length: Int, lineNr: Int, pos: Int, lineBegin: SIndex) {
+        self.lineNr = lineNr
+        self.length = length
+        self.lineBegin = lineBegin
+        self.pos = pos
     }
 
-    public func addPosition(_ end: Position) {
-        count = end.pos - self.pos + end.count
+    func string() -> String {
+        return "Position(lineNr: \(lineNr), pos: \(pos), length: \(length)"
+    }
+
+    func addPosition(_ end: Position) {
+        length = end.pos - self.pos + end.length
     }
 }

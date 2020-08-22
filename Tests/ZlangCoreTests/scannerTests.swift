@@ -40,7 +40,7 @@ final class ScannerTests: XCTestCase {
         let answer = str.split(separator: " ")
         let scanner = Scanner(str)
         for word in answer {
-            let name = scanner.name() ?? ""
+            let name = scanner.scan().lit
             scanner.skipWhitespace()
             XCTAssert(name == word, "Failed scanner name test: \(word) != \(name), \(word.count) != \(name.count)")
         }
@@ -51,9 +51,9 @@ final class ScannerTests: XCTestCase {
         let answer = str.split(separator: " ")
         let scanner = Scanner(str)
         for word in answer {
-            let number = scanner.number() ?? ""
+            let number = scanner.scan().lit
             scanner.skipWhitespace()
-            XCTAssert(number == word, "Failed scanner number test: \(word) != \(name), \(word.count) != \(name.count)")
+            XCTAssert(number == word, "Failed scanner number test: \(word) != \(number), \(word.count) != \(number.count)")
 
         }
     }
@@ -67,7 +67,7 @@ final class ScannerTests: XCTestCase {
         let answer = str.split(separator: "\n")
         let scanner = Scanner(str)
         for word in answer {
-            let string = scanner.string() ?? ""
+            let string = scanner.scan().lit
             scanner.skipWhitespace()
             XCTAssert(word == string, "Failed scanner string test: \(word) != \(string), \(word.count) != \(name.count)")
         }
@@ -88,10 +88,41 @@ final class ScannerTests: XCTestCase {
         }
     }
 
+    func testComment() {
+        let str = """
+        # comment1
+        # comment2
+        # comment3
+        # comment4
+        # comment5
+        """
+        let answer = str.split(separator: "\n")
+        let scanner = Scanner(str)
+        for word in answer {
+            let name = scanner.scan().lit
+            scanner.skipWhitespace()
+            XCTAssert(word == name, "Failed scanner scan comment test: \(word) != \(name), \(word.count) != \(name.count)")
+        }
+    }
+
+    func testOperator() {
+        let str = "+ - * / % ** += -= *= /= %= **= & | &= |= ^= ^"
+        let answer = str.split(separator: " ")
+        let scanner = Scanner(str)
+        for word in answer {
+            let number = scanner.scan().kind.rawValue
+            scanner.skipWhitespace()
+            XCTAssert(number == word, "Failed scanner number test: \(word) != \(number), \(word.count) != \(number.count)")
+
+        }
+    }
+
     static var allTests = [
         ("testInitScanner", testInitScanner),
         ("testName", testName),
         ("testNumber", testNumber),
         ("testString", testString),
+        ("testComment", testComment),
+        ("testOperator", testOperator),
     ]
 }
