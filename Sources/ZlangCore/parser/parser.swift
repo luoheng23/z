@@ -1,7 +1,7 @@
 
 import Files
 
-public class Parser {
+public class parser {
     var scan: Scanner
     public var filePath: String
     var table: Table

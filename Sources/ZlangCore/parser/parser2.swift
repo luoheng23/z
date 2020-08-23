@@ -1,9 +1,9 @@
 
-class Parser2 {
-    var fileName: String = ""
+class Parser {
+    var filePath: String
     var fileNameDir: String = ""
     
-    var scanner: Scanner = Scanner("")
+    var scanner: Scanner
     var tok: Token = Token()
     var preTok: Token = Token()
     var peekTok: Token = Token()
@@ -22,7 +22,15 @@ class Parser2 {
 
     var fnName: String = ""
 
-    init(filename: String) {}
+    init(filePath: String) {
+        self.filePath = filePath
+        self.scanner = Scanner(filePath: filePath)
+    }
+
+    init(str: String) {
+        self.filePath = ""
+        self.scanner = Scanner(str)
+    }
 
     func readFirstToken() {
         for _ in 1...4 {

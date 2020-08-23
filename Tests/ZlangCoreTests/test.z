@@ -1,0 +1,4 @@
+
+let (b, c) = (2, 3)
+let a = b + c
+print(a)

@@ -27,7 +27,7 @@ final class ScannerTests: XCTestCase {
     }
 
     func testInitScanner() {
-        let filename = "LinuxMain.swift"
+        let filename = "test.swift"
         XCTAssertFalse(folder.containsFile(named: filename))
         let file = try? folder.createFile(named: filename)
         XCTAssert(file != nil && file!.name == filename)
