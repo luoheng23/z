@@ -1,6 +1,6 @@
 
 public enum Kind: String {
-  case unknown = ""
+  case unknown = "unknown"
   case eof = "eof"
   case comment = "#"
   case name = "name"  // user
@@ -95,6 +95,10 @@ public enum Kind: String {
   case key_true = "true"
   case key_type = "type"
   case key_var = "var"
+
+  init?() {
+    self.init(rawValue: "unknown")
+  }
 
   // buildKeys genereates a map with keywords' string values:
   // Keywords['return'] == .key_return

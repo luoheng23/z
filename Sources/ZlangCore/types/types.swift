@@ -1,4 +1,5 @@
 public enum Type: String {
+  case unknown = "unknown"
   case _nil = "nil"
   case int8 = "int8"
   case int16 = "int16"
@@ -24,6 +25,10 @@ public enum Type: String {
   case function = "fn"
   case alias = "alias"
   case comment = "comment"
+
+  init?() {
+    self.init(rawValue: "unknown")
+  }
 
   static let signedIntegers: [Type] = [.int8, .int16, .int32, .int64, .int]
   static let unsignedIntegers: [Type] = [.uint8, .uint16, .uint32, .uint64, .uint]
@@ -90,7 +95,7 @@ public enum Type: String {
   }
 }
 
-class TypeSymbol {
+class TypeSymbol: Equatable {
   var name: String
   var kind: Type
   var isOptional: Bool = false
@@ -103,18 +108,23 @@ class TypeSymbol {
   var interfaces: [String: Interface] = [:]
 
   var access: Access
+  var mod: String
 
   init() {
       self.name = ""
-      self.kind = ""
+      self.kind = Type()!
       self.mod = ""
       self.access = ._internal
   }
 
-  init(name: String, kind: Type) {
+  convenience init(name: String, kind: Type) {
+    self.init()
     self.name = name
     self.kind = kind
-    self.access = ._internal
+  }
+
+  static func ==(_ left: TypeSymbol, _ right: TypeSymbol) -> Bool {
+    return (left.name, left.kind, left.isOptional) == (right.name, right.kind, right.isOptional)
   }
 
   func addStaticMethod(_ fn: Fn) {
@@ -123,9 +133,9 @@ class TypeSymbol {
         fatalError("duplicated fn \(fn)")
       }
       if staticMethods[fn.name] == nil {
-        staticMethods[fn.name] = Set<Fn>
+        staticMethods[fn.name] = Set<Fn>()
       }
-      staticMethods[fn.name].add(fn)
+      staticMethods[fn.name]!.insert(fn)
   }
 
   func addInstanceMethod(_ fn: Fn) {
@@ -134,13 +144,13 @@ class TypeSymbol {
       fatalError("duplicated fn \(fn)")
     }
     if instanceMethods[fn.name] == nil {
-      instanceMethods[fn.name] = Set<Fn>
+      instanceMethods[fn.name] = Set<Fn>()
     }
 
-    instanceMethods[fn.name].add(fn)
+    instanceMethods[fn.name]!.insert(fn)
   }
 
-  func hasStaticMethod(_ fn: Fn) {
+  func hasStaticMethod(_ fn: Fn) -> Bool {
     assert(fn.isStatic, "invalid static function")
     if let fns = staticMethods[fn.name], fns.contains(fn) {
       return true
@@ -148,7 +158,7 @@ class TypeSymbol {
     return false
   }
 
-  func hasInstanceMethod(_ fn: Fn) {
+  func hasInstanceMethod(_ fn: Fn) -> Bool {
     assert(!fn.isStatic, "invalid instance method")
     if let fns = instanceMethods[fn.name], fns.contains(fn) {
       return true
@@ -172,7 +182,7 @@ class TypeSymbol {
     instanceVars[_var.name] = _var
   }
 
-  func hasStaticVar(_ _var: Var) {
+  func hasStaticVar(_ _var: Var) -> Bool {
     assert(_var.isStatic, "invalid static var")
     if let vars = staticVars[_var.name], vars == _var {
       return true
@@ -180,7 +190,7 @@ class TypeSymbol {
     return false
   }
 
-  func hasInstanceVar(_ _var: Var) {
+  func hasInstanceVar(_ _var: Var) -> Bool {
     assert(!_var.isStatic, "invalid instance var")
     if let vars = instanceVars[_var.name], vars == _var {
       return true
@@ -188,8 +198,8 @@ class TypeSymbol {
     return false
   }
 
-  func conformToInterface(_ interface: Interface) {
-    
+  func conformToInterface(_ interface: Interface) -> Bool {
+    return false
   }
 
   func type() -> Type {

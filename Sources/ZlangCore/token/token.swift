@@ -7,6 +7,12 @@ class Token {
   var lit: String
   var pos: Position
 
+  init() {
+    self.kind = Kind()!
+    self.lit = ""
+    self.pos = Position()
+  }
+
   init(kind: Kind, lit: String, pos: Position) {
     self.kind = kind
     self.lit = lit

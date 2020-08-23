@@ -25,3 +25,16 @@ class CallArg {
     var expr: Expr = Expr()
 }
 
+class Comment: Expr {
+    var text: String
+
+    override init() {
+        self.text = ""
+        super.init()
+    }
+
+    init(text: String, pos: Position) {
+        self.text = text
+        super.init()
+    }
+}

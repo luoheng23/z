@@ -1,7 +1,16 @@
 
 class BlockStmt: Stmt {
-    var stmts: [Stmt] = []
+    var stmts: [Stmt]
     
+    init(stmts: [Stmt]) {
+        self.stmts = stmts
+        super.init()
+    }
+
+    override init() {
+        self.stmts = []
+        super.init()
+    }
     func append(_ stmt: Stmt) {
         stmts.append(stmt)
     }
@@ -9,7 +18,12 @@ class BlockStmt: Stmt {
 
 class ExprStmt: Stmt {
     var expr: Expr = Expr()
-    var isExpr: Bool = false
+    var isComment: Bool
+    init(expr: Expr, isComment: Bool) {
+        self.expr = expr
+        self.isComment = isComment
+        super.init()
+    }
 }
 
 class ForStmt: Stmt {
@@ -37,10 +51,20 @@ class AssignStmt: Stmt {
 
 class DeferStmt: Stmt {
     var stmts: [Stmt] = []
+
+    init(stmts: [Stmt]) {
+        self.stmts = stmts
+        super.init()
+    }
 }
 
 class GoStmt: Stmt {
     var callExpr: Expr = Expr()
+
+    init(callExpr: Expr) {
+        self.callExpr = callExpr
+        super.init()
+    }
 }
 
 class WithStmt: Stmt {
@@ -68,6 +92,14 @@ class IfBranch: Stmt {
     var block: BlockStmt = BlockStmt()
 }
 
+class BranchStmt: Stmt {
+    var tok: Token
+
+    init(tok: Token) {
+        self.tok = tok
+        super.init()
+    }
+}
 class ReturnStmt: Stmt {
     var expr: Expr = Expr()
     var returnType: Type = ._nil

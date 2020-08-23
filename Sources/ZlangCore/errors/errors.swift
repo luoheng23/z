@@ -6,19 +6,30 @@ enum Reporter {
     case generator
 }
 
-struct Error {
+class ErrorBase {
     var message: String
     var details: String
     var filePath: String
     var pos: Position
-    var backtrace: String
     var reporter: Reporter
+
+    init() {
+        self.message = ""
+        self.details = ""
+        self.filePath = ""
+        self.pos = Position()
+        self.reporter = .parser
+    }
 }
 
-struct Warning {
-    var message: String
-    var details: String
-    var filePath: String
-    var pos: Position
-    var reporter: Reporter
+class Error: ErrorBase {
+    var backtrace: String
+
+    override init() {
+        self.backtrace = ""
+        super.init()
+    }
+
 }
+
+class Warning: ErrorBase {}

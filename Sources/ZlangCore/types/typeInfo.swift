@@ -22,12 +22,11 @@ class Enum: TypeSymbol {
 
 class Alias: TypeSymbol {
     var parentType: TypeSymbol
-    var name: String
 
     init(_ name: String, _ type: TypeSymbol) {
-        super.init()
-        self.name = name
         self.parentType = type
+        super.init()
+        // self.name = name
     }
 
     override func type() -> Type {
@@ -55,5 +54,3 @@ class Interface: TypeSymbol {
 class Tuple: TypeSymbol {
     var types: [Type] = []
 }
-
-class Comment: TypeSymbol {}

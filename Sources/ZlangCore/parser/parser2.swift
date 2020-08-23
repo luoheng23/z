@@ -26,18 +26,22 @@ class Parser2 {
 
     func readFirstToken() {
         for _ in 1...4 {
-            p.next()
+            next()
         }
     }
 
     func openScope() {
-        scope = Scope(parent: scope, startPos: tok.pos)
+        scope = Scope(parent: scope, pos: tok.pos)
     }
 
     func closeScope() {
-        scope.endPos = prevTok.pos
-        scope.parent.children.append(scope)
-        scope = scope.parent
+        if scope.isTopScope {
+            error("failed to close global scope")
+            return
+        }
+        scope.pos.addPosition(preTok.pos)
+        scope.parent!.children.append(scope)
+        scope = scope.parent!
     }
 
     func parseBlock() -> [Stmt] {
@@ -60,13 +64,13 @@ class Parser2 {
                 c += 1
                 if c > 1000000 {
                     errorWithPos("parsed over \(c) statements from fn \(curFnName), the parser is probably stuck", 
-                                    tok.pos())
+                                    tok.pos)
                 }
             }
         }
 
         if isTopLevel {
-            topLevelStatementEnd()
+            // topLevelStatementEnd()
         }
         check(.rcbr)
         return stmts
@@ -88,13 +92,13 @@ class Parser2 {
                 error("unexpected \(tok.kind.str()), expecting \(expected.str())")
             }
         }
-        p.next()
+        next()
     }
 
     func checkName() -> String {
         let name = tok.lit
-        if peekTok.kind == .dot && imports.contains(name) {
-            registerUsedImport(name)
+        if peekTok.kind == .dot && imports[name] != nil {
+            // registerUsedImport(name)
         }
         check(.name)
         return name
@@ -105,42 +109,44 @@ class Parser2 {
         case .key_pub:
             switch (peekTok.kind) {
             case .key_const:
-                return const_decl()
-            case .key_fn:
-                return fn_decl()
+                return constDecl()
+            case .key_func:
+                return fnDecl()
             case .key_struct:
-                return struct_decl()
+                return structDecl()
             case .key_enum:
-                return enum_decl()
+                return enumDecl()
             case .key_interface:
-                return interface_decl()
+                return interfaceDecl()
             case .key_impl:
-                return impl_decl()
+                return implDecl()
             case .key_type:
-                return type_decl()
+                return typeDecl()
             default:
                 error("wrong pub keyword usage")
                 return Stmt()
             }
         case .key_interface:
-            return interface_decl()
+            return interfaceDecl()
         case .key_impl:
-            return impl_decl()
+            return implDecl()
         case .key_import:
             errorWithPos("import can only be declared at the beginning of the file", tok.pos)
-            return import_stmt()
+            return importStmt()
         case .key_const:
-            return const_decl()
-        case .key_fn:
-            return fn_decl()
-        case .struct_decl:
-            return struct_decl()
+            return constDecl()
+        case .key_enum:
+            return enumDecl()
+        case .key_func:
+            return fnDecl()
+        case .key_struct:
+            return structDecl()
         case .key_type:
-            return type_decl()
+            return typeDecl()
         case .comment:
             return commentStmt()
         default:
-            error("bad top level statement " + p.tok.str())
+            error("bad top level statement " + tok.str())
         }
         return Stmt()
     }
@@ -155,14 +161,13 @@ class Parser2 {
     func comment() -> Comment {
         let pos = tok.pos
         let text = tok.lit
-        p.next()
-        return 
+        next()
         return Comment(text: text, pos: pos)
     }
 
     func commentStmt() -> ExprStmt {
-        let comment = comment()
-        return ExprStmt(expr: comment, pos: comment.pos)
+        let comment = self.comment()
+        return ExprStmt(expr: comment, isComment: true)
     }
 
     func allComments() -> [Comment] {
@@ -173,14 +178,14 @@ class Parser2 {
         return comments
     }
 
-    func stmt(_ isTopLevel: Bool) {
+    func stmt(_ isTopLevel: Bool) -> Stmt {
         switch(tok.kind) {
         case .lcbr:
-            return Block(stmts: parseBlock())
+            return BlockStmt(stmts: parseBlock())
         case .key_for:
             return forStmt()
-        case .key_static, .key_fn:
-            return fn_decl()
+        case .key_static, .key_func:
+            return fnDecl()
         case .comment:
             return commentStmt()
         case .key_return:
@@ -197,9 +202,9 @@ class Parser2 {
             let expr = self.expr(0)
             return GoStmt(callExpr: expr)
         case .key_const:
-            return const_decl()
+            return constDecl()
         case .key_var:
-            return var_decl()
+            return varDecl()
         default:
             return parseMultiExpr(isTopLevel)
         }
@@ -211,16 +216,20 @@ class Parser2 {
         while (true) {
             let expr = self.expr(0)
             if expr is Comment {
-                comments.append(expr)
+                comments.append(expr as! Comment)
             } else {
                 exprs.append(expr)
-                if kind != .comma {
+                if tok.kind != .comma {
                     break
                 }
                 next()
             }
         }
-        return exprs, comments
+        return (exprs, comments)
+    }
+
+    func expr(_ time: Int) -> Expr {
+        return Expr()
     }
 
     func error(_ str: String) {
@@ -233,5 +242,63 @@ class Parser2 {
 
     func errorWithPos(_ str: String, _ pos: Position) {
         fatalError(str + pos.str())
+    }
+
+    func warnWithPos(_ str: String, _ pos: Position) {}
+
+    func parseMultiExpr(_ isTopLevel: Bool) -> Stmt {
+        return Stmt()
+    }
+
+    func constDecl() -> Stmt {
+        return Stmt()
+    }
+
+    func varDecl() -> Stmt {
+        return Stmt()
+    }
+
+    func goStmt() -> Stmt {
+        return Stmt()
+    }
+
+    func deferStmt() -> Stmt {
+        return Stmt()
+    }
+
+    func returnStmt() -> Stmt {
+        return Stmt()
+    }
+
+    func forStmt() -> Stmt {
+        return Stmt()
+    }
+
+    func fnDecl() -> Stmt {
+        return Stmt()
+    }
+
+    func structDecl() -> Stmt {
+        return Stmt()
+    }
+
+    func typeDecl() -> Stmt {
+        return Stmt()
+    }
+
+    func importStmt() -> Stmt {
+        return Stmt()
+    }
+
+    func enumDecl() -> Stmt {
+        return Stmt()
+    }
+
+    func interfaceDecl() -> Stmt {
+        return Stmt()
+    }
+
+    func implDecl() -> Stmt {
+        return Stmt()
     }
 }

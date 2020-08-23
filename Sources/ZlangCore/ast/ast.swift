@@ -21,3 +21,5 @@ class Decl: Ast {}
 class Stmt: Ast {}
 
 class Expr: Ast {}
+
+class ConstField {}

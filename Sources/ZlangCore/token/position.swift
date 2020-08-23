@@ -8,6 +8,9 @@ class Position {
     var pos: Int
     var length: Int = 0
 
+    var startPos: Int { return pos }
+    var endPos: Int { return pos + length }
+
     init() {
         self.lineBegin = "".startIndex
         self.lineNr = 0
