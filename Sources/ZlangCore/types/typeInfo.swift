@@ -35,39 +35,25 @@ class Alias: TypeSymbol {
     }
 }
 
-class Struct {
-    var fields: [Field] = []
-    var fns: [Fn] = []
-}
+class Struct: TypeSymbol {}
 
-class Field {
-    var name: String = ""
-    var type: Type = ._nil
-    var defaultExpr: Bool = false
-    var hasDefaultExpr: Bool = false
-    var defaultVal: String = ""
-    var access: Access = ._internal
-    var isVar: Bool = false
-    var isGlobal: Bool = false
-}
-
-class List {
+class List: TypeSymbol {
     var dims: Int = 0
     var size: Int = 0
     var elemType: Type = ._nil
 }
 
-class Dict {
+class Dict: TypeSymbol {
     var key_type: Type = ._nil
     var value_type: Type = ._nil
 }
 
-class Interface {
+class Interface: TypeSymbol {
     var types: [Type] = []
 }
 
-class Tuple {
+class Tuple: TypeSymbol {
     var types: [Type] = []
 }
 
-class Comment {}
+class Comment: TypeSymbol {}

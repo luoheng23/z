@@ -22,7 +22,7 @@ class Position {
         self.pos = pos
     }
 
-    func string() -> String {
+    func str() -> String {
         return "Position(lineNr: \(lineNr), pos: \(pos), length: \(length)"
     }
 

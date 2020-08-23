@@ -25,6 +25,16 @@ class Arg: Equatable {
 }
 
 class Var {
-    var type: Type
+    var type: TypeSymbol
+    var name: String
+    var isVar: Bool
+    var isStatic: Bool
+
+    init(_ type: TypeSymbol, _ name: String, _ isVar: Bool) {
+        self.type = type
+        self.name = name
+        self.isVar = isVar
+        self.isStatic = false
+    }
 }
 

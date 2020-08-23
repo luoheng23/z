@@ -96,13 +96,12 @@ class TypeSymbol {
   var isOptional: Bool = false
   var isGeneric: Bool = false
   var genericTypes: [TypeSymbol]? = nil
-  var staticMethods: [String: [String: Fn]] = [:]
-  var instanceMethods: [String: [String: Fn]] = [:]
+  var staticMethods: [String: Set<Fn>] = [:]
+  var instanceMethods: [String: Set<Fn>] = [:]
   var staticVars: [String: Var] = [:]
   var instanceVars: [String: Var] = [:]
   var interfaces: [String: Interface] = [:]
 
-  var mod: String
   var access: Access
 
   init() {
@@ -112,15 +111,85 @@ class TypeSymbol {
       self.access = ._internal
   }
 
-  init(name: String, kind: Type, mod: String) {
+  init(name: String, kind: Type) {
     self.name = name
     self.kind = kind
-    self.mod = mod
     self.access = ._internal
   }
 
   func addStaticMethod(_ fn: Fn) {
       assert(fn.isStatic, "invalid static function")
+      if hasStaticMethod(fn) {
+        fatalError("duplicated fn \(fn)")
+      }
+      if staticMethods[fn.name] == nil {
+        staticMethods[fn.name] = Set<Fn>
+      }
+      staticMethods[fn.name].add(fn)
+  }
+
+  func addInstanceMethod(_ fn: Fn) {
+    assert(!fn.isStatic, "invalid instance method")
+    if hasInstanceMethod(fn) {
+      fatalError("duplicated fn \(fn)")
+    }
+    if instanceMethods[fn.name] == nil {
+      instanceMethods[fn.name] = Set<Fn>
+    }
+
+    instanceMethods[fn.name].add(fn)
+  }
+
+  func hasStaticMethod(_ fn: Fn) {
+    assert(fn.isStatic, "invalid static function")
+    if let fns = staticMethods[fn.name], fns.contains(fn) {
+      return true
+    }
+    return false
+  }
+
+  func hasInstanceMethod(_ fn: Fn) {
+    assert(!fn.isStatic, "invalid instance method")
+    if let fns = instanceMethods[fn.name], fns.contains(fn) {
+      return true
+    }
+    return false
+  }
+
+  func addStaticVar(_ _var: Var) {
+    assert(_var.isStatic, "invalid static var")
+    if hasStaticVar(_var) {
+      fatalError("duplicated var \(_var)")
+    }
+    staticVars[_var.name] = _var
+  }
+
+  func addInstanceVar(_ _var: Var) {
+    assert(!_var.isStatic, "invalid instance var")
+    if hasInstanceVar(_var) {
+      fatalError("duplicated var \(_var)")
+    }
+    instanceVars[_var.name] = _var
+  }
+
+  func hasStaticVar(_ _var: Var) {
+    assert(_var.isStatic, "invalid static var")
+    if let vars = staticVars[_var.name], vars == _var {
+      return true
+    }
+    return false
+  }
+
+  func hasInstanceVar(_ _var: Var) {
+    assert(!_var.isStatic, "invalid instance var")
+    if let vars = instanceVars[_var.name], vars == _var {
+      return true
+    }
+    return false
+  }
+
+  func conformToInterface(_ interface: Interface) {
+    
   }
 
   func type() -> Type {

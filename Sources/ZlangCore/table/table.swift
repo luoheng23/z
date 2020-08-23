@@ -1,6 +1,6 @@
 
 class Table {
-    var types: [TypeSymbol]
+    var types: [String: TypeSymbol]
     var fns: Dictionary<String, Fn>
     var imports: [String]
     var modules: [String]
@@ -35,7 +35,7 @@ class Table {
             "mut": "mutating",
         ]
         consts = []
-        types = []
+        types = [:]
         fns = [:]
         imports = []
         modules = []
@@ -57,5 +57,7 @@ class Table {
         self.fns[fn.name] = fn
     }
 
-    func registerBuiltinTypeSymbols() {}
+    func registerBuiltinTypeSymbols() {
+        
+    }
 }
