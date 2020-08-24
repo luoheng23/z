@@ -27,7 +27,7 @@ final class ScannerTests: XCTestCase {
     }
 
     func testInitScanner() {
-        let filename = "test.swift"
+        let filename = "test.z"
         XCTAssertFalse(folder.containsFile(named: filename))
         let file = try? folder.createFile(named: filename)
         XCTAssert(file != nil && file!.name == filename)
@@ -110,7 +110,7 @@ final class ScannerTests: XCTestCase {
         let answer = str.split(separator: " ")
         let scanner = Scanner(str)
         for word in answer {
-            let number = scanner.scan().kind.rawValue
+            let number = scanner.scan().lit
             scanner.skipWhitespace()
             XCTAssert(number == word, "Failed scanner number test: \(word) != \(number), \(word.count) != \(number.count)")
 

@@ -6,30 +6,30 @@ class Position {
     var lineBegin: SIndex
     var lineNr: Int
     var pos: Int
-    var length: Int = 0
+    var count: Int = 0
 
     var startPos: Int { return pos }
-    var endPos: Int { return pos + length }
+    var endPos: Int { return pos + count }
 
     init() {
         self.lineBegin = "".startIndex
         self.lineNr = 0
         self.pos = 0
-        self.length = 0
+        self.count = 0
     }
 
-    init(length: Int, lineNr: Int, pos: Int, lineBegin: SIndex) {
+    init(count: Int, lineNr: Int, pos: Int, lineBegin: SIndex) {
         self.lineNr = lineNr
-        self.length = length
+        self.count = count
         self.lineBegin = lineBegin
         self.pos = pos
     }
 
     func str() -> String {
-        return "Position(lineNr: \(lineNr), pos: \(pos), length: \(length)"
+        return "Position(lineNr: \(lineNr), pos: \(pos), length: \(count)"
     }
 
     func addPosition(_ end: Position) {
-        length = end.pos - self.pos + end.length
+        count = end.pos - self.pos + end.count
     }
 }

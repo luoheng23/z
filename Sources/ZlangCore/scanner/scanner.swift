@@ -51,7 +51,7 @@ class Scanner {
   }
 
   func newToken(_ kind: Kind, _ lit: String, _ len: Int) -> Token {
-    let pos = Position(length: len, lineNr: lineNr + 1, pos: self.columnNum - len + 1, 
+    let pos = Position(count: len, lineNr: lineNr + 1, pos: self.columnNum - len + 1, 
                   lineBegin: lastNewLinePos)
     tokenNum += 1
     return Token(kind: kind, lit: lit, pos: pos)
@@ -120,13 +120,16 @@ class Scanner {
     return getStr(start)
   }
 
-  func skipWhitespace() {
+  @discardableResult
+  func skipWhitespace(_ skipNewLine: Bool = true) -> String {
+    let start = pos
     while let c = peek(), c.isWhitespace() {
       if c.isNewLine() && !expect(want: "\r\n", startPos: index(pos: pos, after: -1)) {
         incLineNum()
       }
       nextPos()
     }
+    return getStr(start)
   }
 
   func incLineNum() {
@@ -280,21 +283,29 @@ class Scanner {
     return getStr(start)
   }
 
-  func scan() -> Token {
-    prevTok = scanBasic()
+  func scan(_ skipWhitespace: Bool = true) -> Token {
+    var tok: Token
+    repeat {
+      tok = scanBasic()
+      if tok.kind == .space || tok.kind == .nl {
+        continue
+      }
+    } while tok.kind == .space || tok.kind == .nl
+    prevTok = tok
     return prevTok!
   }
 
   func scanBasic() -> Token {
     if isAtEnd {
-      return constructToken(.eof, "")
+      return constructToken(.eof, Kind.eof.rawValue)
     }
 
     if let c = peek() {
       if c.isLetter() {
         let n = scanName()
         if Kind.isKeyword(n) {
-          return constructToken(Kind.keyToKind(n), "", n.count)
+          let kind = Kind.keyToKind(n)
+          return constructToken(kind, kind.rawValue, n.count)
         }
         return constructToken(.name, n, n.count)
       }
@@ -311,54 +322,64 @@ class Scanner {
         if let d = nextPeek() {
           if c == "*" && d == "*" {
             if let e = next2Peek(), e == "=" {
-              return constructToken(Kind.getKind(c, d, e), "", 3, 3)
+              let kind = Kind.getKind(c, d, e)
+              return constructToken(kind, kind.rawValue, 3, 3)
             }
-            return constructToken(Kind.getKind(c, d), "", 2, 2)
+            let kind = Kind.getKind(c, d)
+            return constructToken(kind, kind.rawValue, 2, 2)
           }
           if d == "=" {
-            return constructToken(Kind.getKind(c, d), "", 2, 2)
+            let kind = Kind.getKind(c, d)
+            return constructToken(kind, kind.rawValue, 2, 2)
           }
         }
-        return constructToken(Kind.getKind(c), "", 1, 1)
+        let kind = Kind.getKind(c)
+        return constructToken(kind, kind.rawValue, 1, 1)
       case "?", "(", ")", "[", "]", "{", "}", ",", ";", "@", ":":
-        return constructToken(Kind.getKind(c), "", 1, 1)
+        let kind = Kind.getKind(c)
+        return constructToken(kind, kind.rawValue, 1, 1)
       case "#":
         let cmt = scanComment()
         return constructToken(.comment, cmt, cmt.count)
       case "\r", "\n":
         incLineNum()
         if let d = nextPeek(), c == "\r" && d == "\n" {
-          return constructToken(.nl, "", 2, 2)
+          return constructToken(.nl, Kind.nl.rawValue, 2, 2)
         }
-        return constructToken(.nl, "", 1, 1)
+        return constructToken(.nl, Kind.nl.rawValue, 1, 1)
       case "\t", " ":
-        return constructToken(Kind.getKind(c), "", 1, 1)
+        let space = skipWhitespace(false)
+        return constructToken(.space, space, space.count)
       case ".":
         if expect(want: "...", startPos: pos) {
-          return constructToken(.range, "", 3, 3)
+          return constructToken(.range, Kind.range.rawValue, 3, 3)
         }
         if expect(want: "..<", startPos: pos) {
-          return constructToken(.halfRange, "", 3, 3)
+          return constructToken(.halfRange, Kind.halfRange.rawValue, 3, 3)
         }
         return constructToken(.dot, "", 1, 1)
       case ">", "<":
         if let d = nextPeek(), d == "=" || c == d {
-          return constructToken(Kind.getKind(c, d), "", 2, 2)
+          let kind = Kind.getKind(c, d)
+          return constructToken(kind, kind.rawValue, 2, 2)
         }
-        return constructToken(Kind.getKind(c), "", 1, 1)
+        let kind = Kind.getKind(c)
+        return constructToken(kind, kind.rawValue, 1, 1)
       case "&", "|":
         if let d = nextPeek(), d == "=" {
-          return constructToken(Kind.getKind(c, d), "", 2, 2)
+          let kind = Kind.getKind(c, d)
+          return constructToken(kind, kind.rawValue, 2, 2)
         }
-        return constructToken(Kind.getKind(c), "", 1, 1)
+        let kind = Kind.getKind(c)
+        return constructToken(kind, kind.rawValue, 1, 1)
       case "\"":
         let str = scanString()
         return constructToken(.string, str, str.count)
       default:
-        return constructToken(.unknown, "")
+        return constructToken(.unknown, Kind.unknown.rawValue)
       }
     }
-    return constructToken(.unknown, "")
+    return constructToken(.unknown, Kind.unknown.rawValue)
   }
 
 

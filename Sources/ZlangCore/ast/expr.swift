@@ -38,3 +38,23 @@ class Comment: Expr {
         super.init()
     }
 }
+
+class BoolLiteral: Expr {
+    var bool: Bool
+
+    override init() {
+        self.bool = true
+        super.init()
+    }
+
+    init(bool: Bool, _ comments: [Comment], _ pos: Position) {
+        self.bool = bool
+        super.init(pos, comments, .bool)
+    }
+}
+
+class None: Expr {
+    init(pos: Position) {
+        super.init(pos, [], ._nil)
+    }
+}

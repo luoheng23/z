@@ -19,6 +19,7 @@ class Parser {
     var imports: Dictionary<String, String> = [:]
     var errors: Error = Error()
     var warnings: Warning = Warning()
+    var comments: [Comment] = []
 
     var fnName: String = ""
 
@@ -234,10 +235,6 @@ class Parser {
             }
         }
         return (exprs, comments)
-    }
-
-    func expr(_ time: Int) -> Expr {
-        return Expr()
     }
 
     func error(_ str: String) {
