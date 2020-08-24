@@ -23,10 +23,6 @@ class Token {
     return "\(kind.str()) '\(lit)'"
   }
 
-  func precedence() -> Precedence {
-    return Precedence.getPrecedence(kind)
-  }
-
   func isScalar() -> Bool {
     return [Kind.name, Kind.string].contains(kind)
   }
@@ -45,7 +41,7 @@ class Token {
 
   func isInfix() -> Bool {
     return [Kind.plus, .minus, .mod, .mul, .div, .pow, .eq, .ne, .gt, .lt, .key_in,
-      .key_not_in, .key_is, .key_is_not, .ge, .le, .key_or, .xor, .key_and, .dot, .pipe, .amp,
+      .key_not_in, .key_is, .key_is_not, .ge, .le, .key_or, .xor, .key_and, .pipe, .amp,
       .left_shift, .right_shift].contains(kind)
   }
 
@@ -71,6 +67,10 @@ class Token {
 
   func isNotKind(_ kind: Kind) -> Bool {
     return !isKind(kind)
+  }
+
+  func precedence() -> Int {
+    return Precedence.getPrecedence(kind).rawValue
   }
 }
 

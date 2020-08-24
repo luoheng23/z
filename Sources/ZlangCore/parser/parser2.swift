@@ -219,22 +219,17 @@ class Parser {
         }
     }
 
-    func exprList() -> ([Expr], [Comment]) {
+    func exprList() -> [Expr] {
         var exprs: [Expr] = []
-        var comments: [Comment] = []
         while (true) {
-            let expr = self.expr(0)
-            if expr is Comment {
-                comments.append(expr as! Comment)
-            } else {
-                exprs.append(expr)
-                if tok.kind != .comma {
-                    break
-                }
-                next()
+            let expr = self.expr()
+            exprs.append(expr)
+            if tok.kind != .comma {
+                break
             }
+            next()
         }
-        return (exprs, comments)
+        return exprs
     }
 
     func error(_ str: String) {
@@ -254,9 +249,24 @@ class Parser {
     func parseMultiExpr(_ isTopLevel: Bool) -> Stmt {
         return Stmt()
     }
-
+    
     func constDecl() -> Stmt {
-        return Stmt()
+        let startPos = tok.pos
+        let isPub = tok.kind == .key_pub
+        if isPub {
+            next()
+        }
+        var endPos = tok.pos
+        check(.key_const)
+        switch(tok.kind) {
+        case .name:
+            next()
+            switch(tok.kind) {
+            case .colon:
+                let type = self.expr()
+
+            }
+        }
     }
 
     func varDecl() -> Stmt {

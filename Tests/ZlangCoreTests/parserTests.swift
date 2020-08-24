@@ -71,13 +71,118 @@ final class ParserTests: XCTestCase {
         """
         let parser = Parser(str: str)
         parser.readFirstToken()
-        let none = parser.expr()
-        XCTAssert(none is None, "Failed to parse None")
+        let none = parser.expr() as! None
+        XCTAssert(none.text() == "nil", "Failed to parse None")
     }
+
+    func testComments() {
+        let str = """
+        # hello world
+        # good day
+        # it's all right
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        let first = parser.expr() as! Comment
+        let second = parser.expr() as! Comment
+        let third = parser.expr() as! Comment
+        let answer = str.split(separator: "\n")
+        XCTAssert(first.text() == answer[0], "Failed to parse comment: \(first.text()) != \(answer[0])")
+        XCTAssert(second.text() == answer[1], "Failed to parse comment: \(second.text()) != \(answer[1])")
+        XCTAssert(third.text() == answer[2], "Failed to parse comment: \(third.text()) != \(answer[2])")
+    }
+
+    func testEnumVal() {
+        let str = """
+        .hello
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        let first = parser.expr() as! EnumVal
+        let answer = str.split(separator: "\n")
+        XCTAssert(first.text() == answer[0], "Failed to parse EnumVal: \(first.text()) != \(answer[0])")
+    }
+
+    func testTuple() {
+        let str = """
+        (.hello)
+        (.good)
+        (.zzr)
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        let first = parser.expr() as! Tuple
+        let second = parser.expr() as! Tuple
+        let third = parser.expr() as! Tuple
+        let answer = str.split(separator: "\n")
+        XCTAssert(first.text() == answer[0], "Failed to parse Tuple: \(first.text()) != \(answer[0])")
+        XCTAssert(second.text() == answer[1], "Failed to parse Tuple: \(second.text()) != \(answer[1])")
+        XCTAssert(third.text() == answer[2], "Failed to parse Tuple: \(third.text()) != \(answer[2])")
+    }
+
+    func testPrefixExpr() {
+        let str = """
+        -hello
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        let first = parser.expr() as! PrefixExpr
+        let answer = str.split(separator: "\n")
+        XCTAssert(first.text() == answer[0], "Failed to parse PrefixExpr: \(first.text()) != \(answer[0])")
+    }
+
+    func testSelectorExpr() {
+        let str = """
+        .hello
+        .good
+        .day
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        let first = parser.expr() as! SelectorExpr
+        let answer = str.split(separator: "\n").joined(separator: "")
+        XCTAssert(first.text() == answer, "Failed to parse SelectorExpr: \(first.text()) != \(answer)")
+    }
+
+
+    func testIndexExpr() {
+        let str = """
+        hello[.good.day]
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        let first = parser.expr() as! IndexExpr
+        let answer = str.split(separator: "\n").joined(separator: "")
+        XCTAssert(first.text() == answer, "Failed to parse IndexExpr: \(first.text()) != \(answer)")
+    }
+
+    func testInfixExpr() {
+        let str = """
+        hello[.good.day] + world[hello[good]]
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        let first = parser.expr() as! InfixExpr
+        let left = first.left as! IndexExpr
+        let right = first.right as! IndexExpr
+        let op = first.op
+        let answer = str.split(separator: " ")
+        XCTAssert(left.text() == answer[0], "Failed to parse InfixExpr: \(first.text()) != \(answer[0])")
+        XCTAssert(op.str() == answer[1], "Failed to parse InfixExpr: \(op.str()) != \(answer[1])")
+        XCTAssert(right.text() == answer[2], "Failed to parse InfixExpr: \(right.text()) != \(answer[2])")
+    }
+
     static var allTests = [
         ("testInitParser", testInitParser),
         ("testReadFirstToken", testReadFirstToken),
         ("testBoolLiteral", testBoolLiteral),
         ("testNone", testNone),
+        ("testComments", testComments),
+        ("testEnumVal", testEnumVal),
+        ("testTuple", testTuple),
+        ("testPrefixExpr", testPrefixExpr),
+        ("testSelectorExpr", testSelectorExpr),
+        ("testIndexExpr", testIndexExpr),
+        ("testInfixExpr", testInfixExpr),
     ]
 }

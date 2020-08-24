@@ -50,7 +50,3 @@ class Dict: TypeSymbol {
 class Interface: TypeSymbol {
     var types: [Type] = []
 }
-
-class Tuple: TypeSymbol {
-    var types: [Type] = []
-}

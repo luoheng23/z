@@ -357,7 +357,7 @@ class Scanner {
         if expect(want: "..<", startPos: pos) {
           return constructToken(.halfRange, Kind.halfRange.rawValue, 3, 3)
         }
-        return constructToken(.dot, "", 1, 1)
+        return constructToken(.dot, Kind.dot.rawValue, 1, 1)
       case ">", "<":
         if let d = nextPeek(), d == "=" || c == d {
           let kind = Kind.getKind(c, d)

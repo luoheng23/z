@@ -88,6 +88,19 @@ final class ScannerTests: XCTestCase {
         }
     }
 
+    func testNameWithDot() {
+        let str = """
+        .hello .zzr
+        """
+        let answer = [".", "hello", ".", "zzr"]
+        let scanner = Scanner(str)
+        for word in answer {
+            let name = scanner.scan().lit
+            scanner.skipWhitespace()
+            XCTAssert(word == name, "Failed scanner scan test: \(word) != \(name), \(word.count) != \(name.count)")
+        }
+    }
+
     func testComment() {
         let str = """
         # comment1
@@ -124,5 +137,6 @@ final class ScannerTests: XCTestCase {
         ("testString", testString),
         ("testComment", testComment),
         ("testOperator", testOperator),
+        ("testNameWithDot", testNameWithDot),
     ]
 }

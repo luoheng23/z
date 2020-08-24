@@ -206,6 +206,7 @@ public enum Kind: String {
     .bit_not,
     .amp,
     .at,
+    .dot,
     .assign,
     .gt,
     .lt,
