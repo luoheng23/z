@@ -2,7 +2,7 @@
 class Ast { 
     var pos: Position 
     var comments: [Comment]
-    var type: TypeSymbol?
+    var type: Value?
 
     init() {
         self.pos = Position()
@@ -10,13 +10,13 @@ class Ast {
         self.type = nil
     }
 
-    init(_ pos: Position, _ comments: [Comment], _ type: TypeSymbol) {
+    init(_ pos: Position, _ comments: [Comment], _ type: Value) {
         self.pos = pos
         self.comments = comments
         self.type = type
     }
 
-    init(_ pos: Position, _ comments: [Comment]) {
+    init(_ pos: Position, _ comments: [Comment] = []) {
         self.pos = pos
         self.comments = comments
         self.type = nil

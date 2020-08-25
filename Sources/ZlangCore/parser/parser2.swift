@@ -10,15 +10,15 @@ class Parser {
     var peekTok2: Token = Token()
     var peekTok3: Token = Token()
 
-    var table: Table = Table()
-
     var curFnName: String = ""
+
     var mod: String = ""
     var scope: Scope = Scope()
-    var globalScope: Scope = Scope()
-    var imports: Dictionary<String, String> = [:]
+    var globalScope: Scope = Scope(true)
+
     var errors: Error = Error()
     var warnings: Warning = Warning()
+
     var comments: [Comment] = []
 
     var fnName: String = ""
@@ -251,22 +251,23 @@ class Parser {
     }
     
     func constDecl() -> Stmt {
-        let startPos = tok.pos
-        let isPub = tok.kind == .key_pub
-        if isPub {
-            next()
-        }
-        var endPos = tok.pos
-        check(.key_const)
-        switch(tok.kind) {
-        case .name:
-            next()
-            switch(tok.kind) {
-            case .colon:
-                let type = self.expr()
+        // let startPos = tok.pos
+        // let isPub = tok.kind == .key_pub
+        // if isPub {
+        //     next()
+        // }
+        // var endPos = tok.pos
+        // check(.key_const)
+        // switch(tok.kind) {
+        // case .name:
+        //     next()
+        //     switch(tok.kind) {
+        //     case .colon:
+        //         let type = self.expr()
 
-            }
-        }
+        //     }
+        // }
+        return Stmt()
     }
 
     func varDecl() -> Stmt {

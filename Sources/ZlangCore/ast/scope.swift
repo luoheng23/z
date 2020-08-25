@@ -1,49 +1,44 @@
 
-enum ScopeObject {
-    case const(ConstField)
-    case _var(Var)
-}
-
 class Scope {
     var parent: Scope?
     var children: [Scope]
-    var objects: [String: ScopeObject]
     var pos: Position
     var isTopScope: Bool { parent == nil }
+    var table: TableForType
 
-    init() {
-        self.parent = nil
-        self.children = []
-        self.objects = [:]
-        self.pos = Position()
+    init(_ globalScope: Bool = false) {
+        parent = nil
+        children = []
+        pos = Position()
+        table = TableForType()
+        if globalScope {
+            table.registerBuiltinTypeSymbols()
+        }
     }
 
-    init(parent: Scope, pos: Position, _ isTopScope: Bool = false) {
+    convenience init(parent: Scope, pos: Position, _ isTopScope: Bool = false) {
+        self.init()
         self.parent = parent
-        self.children = []
-        self.objects = [:]
+        self.table = TableForType()
         self.pos = pos
     }
 
-    func findWithScope(_ name: String) -> (ScopeObject, Scope)? {
+    func findWithScope(_ name: String) -> (Value, Scope)? {
         var sc = self
-        while let s = sc.parent {
-            if let c = s.objects[name] {
-                return (c, s)
+        while true {
+            if let c = sc.find(name) {
+                return (c, sc)
             }
-            if s.isTopScope {
+            if isTopScope {
                 break
             }
-            sc = s.parent!
+            sc = sc.parent!
         }
         return nil
     }
 
-    func find(_ name: String) -> ScopeObject? {
-        if let c = findWithScope(name) {
-            return c.0
-        }
-        return nil
+    func find(_ name: String) -> Value? {
+        return table.findValue(name)
     }
 
     func has(_ name: String) -> Bool {
@@ -51,55 +46,21 @@ class Scope {
     }
 
     func findVar(_ name: String) -> Var? {
-        if let _var = find(name) {
-            switch _var {
-            case ._var(let varField):
-                return varField
-            default:
-                return nil
-            }
-        }
-        return nil
-    }
-
-    func findConst(_ name: String) -> ConstField? {
-        if let _const = find(name) {
-            switch _const {
-            case .const(let constField):
-                return constField
-            default:
-                return nil
-            }
-        }
-        return nil
+        return table.findVar(name)
     }
 
     func hasVar(_ name: String) -> Bool {
         return findVar(name) != nil
     }
 
-    func hasConst(_ name: String) -> Bool {
-        return findConst(name) != nil
-    }
-
-    func updateVarType(_ name: String, _ type: TypeSymbol) {
-        if let _var = findVar(name) {
-            _var.type = type
-        }
-        
-    }
-
-    func register(_ name: String, _ obj: ScopeObject) {
-        if name == "_" || has(name) {
-            return
-        }
-        objects[name] = obj
+    func register(_ obj: Value) {
+        table.register(obj)
     }
 
     func outermost() -> Scope {
         var sc = self
-        while let s = sc.parent, !s.isTopScope {
-            sc = s.parent!
+        while !sc.isTopScope {
+            sc = sc.parent!
         }
         return sc
     }
@@ -124,6 +85,6 @@ class Scope {
     }
 
     func contains(_ pos: Int) -> Bool {
-        return pos >= self.pos.startPos && pos <= self.pos.endPos
+        return self.pos.contains(pos)
     }
 }

@@ -6,7 +6,7 @@ class SelectorExpr: Expr {
     init(_ expr: Expr, _ fieldName: String, _ pos: Position) {
         self.expr = expr
         self.fieldName = fieldName
-        super.init(pos, [])
+        super.init(pos)
     }
 
     override func str() -> String {
@@ -25,7 +25,7 @@ class IndexExpr: Expr {
     init(_ expr: Expr, _ fieldExpr: Expr, _ pos: Position) {
         self.expr = expr
         self.fieldExpr = fieldExpr
-        super.init(pos, [])
+        super.init(pos)
     }
 
     override func str() -> String {
@@ -52,9 +52,6 @@ class CallExpr: Expr {
     var isField: Bool = false
     var args: [CallArg] = []
     var expectedArgTypes: [Type] = []
-    var leftType: Type = ._nil
-    var receiverType: Type = ._nil
-    var returnType: Type = ._nil
 }
 
 class CallArg {
@@ -72,7 +69,7 @@ class Comment: Expr {
 
     init(text: String, pos: Position) {
         self.comment = text
-        super.init(pos, [])
+        super.init(pos)
     }
 
     override func str() -> String {
@@ -86,7 +83,7 @@ class Comment: Expr {
 
 class None: Expr {
     init(pos: Position) {
-        super.init(pos, [])
+        super.init(pos)
     }
 
     override func str() -> String {
@@ -103,7 +100,7 @@ class EnumVal: Expr {
 
     init(val: String, pos: Position, associatedValue: String = "") {
         self.val = val
-        super.init(pos, [])
+        super.init(pos)
     }
 
     override func str() -> String {
@@ -120,16 +117,20 @@ class Tuple: Expr {
 
     init(_ exprs: [Expr], _ pos: Position) {
         self.exprs = exprs
-        super.init(pos, [])
+        super.init(pos)
     }
 
     override func str() -> String {
-        return "Tuple(" + text() + ")"
+        var str = exprs.map { expr in
+            return expr.str()
+        }.joined(separator: ",")
+        str = "(" + str + ")"
+        return "Tuple(" + str + ")"
     }
 
     override func text() -> String {
         let str = exprs.map { expr in
-            return expr.str()
+            return expr.text()
         }.joined(separator: ",")
         return "(" + str + ")"
     }
@@ -142,7 +143,7 @@ class PrefixExpr: Expr {
     init(op: Kind, right: Expr, _ pos: Position) {
         self.op = op
         self.right = right
-        super.init(pos, [], right.type ?? TypeSymbol())
+        super.init(pos, [], right.type ?? Var(""))
     }
 
     override func str() -> String {
@@ -180,7 +181,7 @@ class InfixExpr: Expr {
         self.left = left
         self.op = op
         self.right = right
-        super.init(pos, [], right.type ?? TypeSymbol())
+        super.init(pos, [], right.type ?? Var(""))
     }
 
     override func str() -> String {

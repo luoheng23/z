@@ -32,4 +32,8 @@ class Position {
     func addPosition(_ end: Position) {
         count = end.pos - self.pos + end.count
     }
+
+    func contains(_ pos: Int) -> Bool {
+        return startPos <= pos && pos <= endPos
+    }
 }

@@ -1,4 +1,6 @@
 
+class TypeInfo {}
+
 class EnumCase {
     var associateType: Type?
     var name: String
@@ -16,37 +18,34 @@ class EnumCase {
     }
 }
 
-class Enum: TypeSymbol {
+class Enum: TableForType {
     var cases: [EnumCase] = []
 }
 
-class Alias: TypeSymbol {
-    var parentType: TypeSymbol
+class Alias: TableForType {
+    var parentType: TableForType
 
-    init(_ name: String, _ type: TypeSymbol) {
+    init(_ name: String, _ type: TableForType) {
         self.parentType = type
         super.init()
         // self.name = name
     }
 
-    override func type() -> Type {
+    override func type() -> String {
         return parentType.type()
     }
 }
 
-class Struct: TypeSymbol {}
+class Struct: TableForType {}
 
-class List: TypeSymbol {
+class List: TableForType {
     var dims: Int = 0
     var size: Int = 0
-    var elemType: Type = ._nil
 }
 
-class Dict: TypeSymbol {
-    var key_type: Type = ._nil
-    var value_type: Type = ._nil
+class Dict: TableForType {
 }
 
-class Interface: TypeSymbol {
+class Interface: TableForType {
     var types: [Type] = []
 }

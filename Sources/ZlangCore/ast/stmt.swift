@@ -37,8 +37,6 @@ class ForInStmt: Stmt {
     var value: String = ""
     var block: BlockStmt = BlockStmt()
 
-    var keyType: Type = ._nil
-    var valueType: Type = ._nil
 }
 
 class AssignStmt: Stmt {
@@ -102,6 +100,5 @@ class BranchStmt: Stmt {
 }
 class ReturnStmt: Stmt {
     var expr: Expr = Expr()
-    var returnType: Type = ._nil
 }
 

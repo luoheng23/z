@@ -1,63 +1,88 @@
+class TableForImportsAndModules {
+  var imports: Set<String> = []
+  var modules: Set<String> = []
+}
 
-class Table {
-    var types: [String: TypeSymbol]
-    var fns: Dictionary<String, Fn>
-    var imports: [String]
-    var modules: [String]
+class TableForType {
+  var typeFunc: [String: TableForType]
+  var fns: [String: Fns]
+  var vars: [String: Var]
+  var belongTo: Var?
 
-    var typeDict: [String: String]
-    var consts: Array<String>
-    
-    func register(_ from: String, _ to: String) {
-        typeDict[from] = to
+  init() {
+    typeFunc = [:]
+    fns = [:]
+    vars = [:]
+    belongTo = nil
+  }
+
+  func findFn(_ name: String) -> Fns? {
+    return self.fns[name]
+  }
+
+  func hasFn(_ name: String) -> Bool {
+    return findFn(name) != nil
+  }
+
+  func findVar(_ name: String) -> Var? {
+    return self.vars[name]
+  }
+
+  func hasVar(_ name: String) -> Bool {
+    return findVar(name) != nil
+  }
+
+  func findValue(_ name: String) -> Value? {
+    if let fn = findFn(name) {
+      return fn
     }
-
-    init() {
-        typeDict = [
-            "const": "let",
-            "fn": "func",
-            "int": "Int",
-            "int8": "Int8",
-            "int16": "Int16",
-            "int32": "Int32",
-            "int64": "Int64",
-            "uint":   "UInt",
-            "uint8":  "UInt8",
-            "uint16": "UInt16",
-            "uint32": "UInt32",
-            "uint64": "UInt64",
-            "double": "Double",
-            "float": "Float",
-            "char": "Character",
-            "str": "String",
-            "extend": "extension",
-            "interface": "protocol",
-            "mut": "mutating",
-        ]
-        consts = []
-        types = [:]
-        fns = [:]
-        imports = []
-        modules = []
+    if let _var = findVar(name) {
+      return _var
     }
+    return nil
+  }
 
-    func getValue(_ from: String) -> String {
-        return typeDict[from] ?? from
+  func registerFn(_ fn: Fn) {
+    if self.fns[fn.name]?.contains(fn) != nil {
+      fatalError("duplicated function \(fn.name) with \(fn.signature)")
     }
+    if self.fns[fn.name] == nil {
+      self.fns[fn.name] = Fns(fn.name)
+    }
+    self.fns[fn.name]!.insert(fn)
+  }
 
-    func findFn(_ name: String) -> Fn? {
-        return self.fns[name]
+  func registerVar(_ _var: Var) {
+    if self.vars[_var.name] != nil {
+      fatalError("duplicated variable \(_var.name)")
     }
+    self.vars[_var.name] = _var
+  }
 
-    func hasFn(_ name: String) -> Bool {
-        return findFn(name) != nil
+  func register(_ val: Value) {
+    if let fn = val as? Fn {
+      registerFn(fn)
+    } else if let _var = val as? Var {
+      registerVar(_var)
     }
+    fatalError("invalid type to register")
+  }
 
-    func registerFn(_ fn: Fn) {
-        self.fns[fn.name] = fn
-    }
+  func registerBuiltinTypeSymbols() {
 
-    func registerBuiltinTypeSymbols() {
-        
+  }
+
+  func getValue(_ val: String) -> String {
+    if let v = findValue(val) {
+      return v.name
     }
+    return val
+  }
+
+  func type() -> String {
+    if let belt = belongTo {
+      return belt.type()
+    }
+    return "unknown"
+  }
 }

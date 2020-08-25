@@ -4,14 +4,13 @@ import Files
 public class parser {
     var scan: Scanner
     public var filePath: String
-    var table: Table
+    var table: TableForType
 
     public init(_ filename: String) {
         scan = Scanner(filePath: filename)
         filePath = filename.split(separator: ".")[0] + ".swift"
-        table = Table()
+        table = TableForType()
     }
-
 
     public func parseToFile() {
         var tok: Token
