@@ -93,6 +93,14 @@ class Parser {
         peekTok3 = scanner.scan()
     }
 
+    func eatToEndOfLine() {
+        var scan = scanner.scan()
+        while scan.kind != .nl {
+            scan = scanner.scan()
+        }
+        readFirstToken()
+    }
+
     func check(_ expected: Kind) {
         if tok.kind != expected {
             if tok.kind == .name {
@@ -106,9 +114,6 @@ class Parser {
 
     func checkName() -> String {
         let name = tok.lit
-        if peekTok.kind == .dot && imports[name] != nil {
-            // registerUsedImport(name)
-        }
         check(.name)
         return name
     }
@@ -270,9 +275,6 @@ class Parser {
         return Stmt()
     }
 
-    func varDecl() -> Stmt {
-        return Stmt()
-    }
 
     func goStmt() -> Stmt {
         return Stmt()

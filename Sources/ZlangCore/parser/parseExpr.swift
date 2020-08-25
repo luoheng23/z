@@ -13,12 +13,7 @@ extension Parser {
         case .dot:
             node = enumVal()
         case .lpar:
-            let pos = tok.pos
-            check(.lpar)
-            let n = exprList()
-            pos.addPosition(tok.pos)
-            check(.rpar)
-            node = Tuple(n, pos)
+            node = tupleExpr()
         case .string:
             node = stringExpr()
         case .name:
@@ -54,7 +49,9 @@ extension Parser {
     }
 
     func stringExpr() -> Expr {
-        return Expr()
+        let node = StringLiteral(val: tok.lit, tok.pos)
+        next()
+        return node
     }
 
     func numberExpr() -> Expr {
@@ -73,6 +70,15 @@ extension Parser {
         return EnumVal(val: checkName(), pos: tok.pos)
     }
     
+    func tupleExpr() -> Tuple {
+        let pos = tok.pos
+        check(.lpar)
+        let n = exprList()
+        pos.addPosition(tok.pos)
+        check(.rpar)
+        return Tuple(n, pos)
+    }
+
     func prefixExpr() -> PrefixExpr {
         let pos = tok.pos
         let op = tok.kind

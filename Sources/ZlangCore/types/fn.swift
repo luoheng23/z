@@ -49,6 +49,8 @@ class Fn: Value, Equatable, Hashable {
     var isGeneric: Bool = false
     var genericTypes: [GenericType]? = nil
 
+    var belongTo: Var? = nil
+
     static func ==(_ my: Fn, _ other: Fn) -> Bool {
         return my.returns == other.returns && my.args == other.args
     }
@@ -96,7 +98,6 @@ class Var: Value, Equatable {
     var isVar: Bool
     var isType: Bool
     var relatedTypeSymbol: TableForType?
-    var relatedTypeTypeSymbol: TableForType?
 
     var const: Bool { !isVar }
 
@@ -105,7 +106,6 @@ class Var: Value, Equatable {
         self.isVar = false
         self.isType = false
         self.relatedTypeSymbol = nil
-        self.relatedTypeTypeSymbol = nil
         super.init(name)
     }
 
@@ -113,6 +113,10 @@ class Var: Value, Equatable {
         self.init(name)
         self.typ = type
         self.isVar = isVar
+    }
+
+    func setTableForType(_ table: TableForType) {
+        relatedTypeSymbol = table
     }
 
     static func ==(_ left: Var, _ right: Var) -> Bool {
@@ -126,6 +130,13 @@ class Var: Value, Equatable {
             return typ.str() + " " + rs.type()
         }
         return typ.str()
+    }
+
+    func getTypeName() -> String {
+        if isType {
+            return name
+        }
+        return "type_" + name
     }
 }
 

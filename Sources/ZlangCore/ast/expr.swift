@@ -115,6 +115,8 @@ class EnumVal: Expr {
 class Tuple: Expr {
     var exprs: [Expr]
 
+    var count: Int { exprs.count }
+
     init(_ exprs: [Expr], _ pos: Position) {
         self.exprs = exprs
         super.init(pos)
@@ -160,7 +162,7 @@ class NameExpr: Expr {
 
     init(name: String, pos: Position) {
         self.name = name
-        super.init(pos, [])
+        super.init(pos)
     }
 
     override func str() -> String {

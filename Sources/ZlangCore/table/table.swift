@@ -68,6 +68,10 @@ class TableForType {
     fatalError("invalid type to register")
   }
 
+  func setOwner(_ owner: Var) {
+      belongTo = owner
+  }
+
   func registerBuiltinTypeSymbols() {
 
   }

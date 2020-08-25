@@ -8,7 +8,7 @@ class BoolLiteral: Expr {
 
     init(bool: Bool, _ pos: Position) {
         self.bool = bool
-        super.init(pos, [])
+        super.init(pos)
     }
 
     override func str() -> String {
@@ -21,7 +21,7 @@ class FloatLiteral: Expr {
 
     init(val: String, _ pos: Position) {
         self.val = val
-        super.init(pos, [])
+        super.init(pos)
     }
 
     override func str() -> String {
@@ -34,7 +34,20 @@ class IntegerLiteral: Expr {
 
     init(val: String, _ pos: Position) {
         self.val = val
-        super.init(pos, [])
+        super.init(pos)
+    }
+
+    override func str() -> String {
+        return val
+    }
+}
+
+class StringLiteral: Expr {
+    var val: String
+
+    init(val: String, _ pos: Position) {
+        self.val = val
+        super.init(pos)
     }
 
     override func str() -> String {
