@@ -1,56 +1,81 @@
-class BoolLiteral: Expr {
+
+class Literal: Expr {
+    var defaultType: Var
+
+    init(_ pos: Position, _ defaultType: Var) {
+        self.defaultType = defaultType
+        super.init(pos)
+    }
+}
+
+class BoolLiteral: Literal {
     var bool: Bool
 
-    override init() {
-        self.bool = true
-        super.init()
-    }
-
-    init(bool: Bool, _ pos: Position) {
+    init(bool: Bool, _ pos: Position, _ type: Var) {
         self.bool = bool
-        super.init(pos)
+        super.init(pos, type)
     }
 
     override func str() -> String {
+        return "BoolLiteral(\(text()))"
+    }
+
+    override func text() -> String {
         return bool ? "true" : "false"
     }
+
+
 }
 
-class FloatLiteral: Expr {
+class FloatLiteral: Literal {
     var val: String
 
-    init(val: String, _ pos: Position) {
+    init(val: String, _ pos: Position, _ type: Var) {
         self.val = val
-        super.init(pos)
+        super.init(pos, type)
     }
 
     override func str() -> String {
+        return "FloatLiteral(\(val))"
+    }
+
+    override func text() -> String {
         return val
     }
 }
 
-class IntegerLiteral: Expr {
+class IntegerLiteral: Literal {
     var val: String
 
-    init(val: String, _ pos: Position) {
+    init(val: String, _ pos: Position, _ type: Var) {
         self.val = val
-        super.init(pos)
+        super.init(pos, type)
     }
 
     override func str() -> String {
+        return "IntegerLiteral(\(val))"
+    }
+
+    override func text() -> String {
         return val
     }
+
+
 }
 
-class StringLiteral: Expr {
+class StringLiteral: Literal {
     var val: String
 
-    init(val: String, _ pos: Position) {
+    init(val: String, _ pos: Position, _ type: Var) {
         self.val = val
-        super.init(pos)
+        super.init(pos, type)
     }
 
     override func str() -> String {
+        return "StringLiteral(\(val))"
+    }
+
+    override func text() -> String {
         return val
     }
 }

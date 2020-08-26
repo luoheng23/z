@@ -30,10 +30,6 @@ class Alias: TableForType {
         super.init()
         // self.name = name
     }
-
-    override func type() -> String {
-        return parentType.type()
-    }
 }
 
 class Struct: TableForType {}

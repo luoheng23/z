@@ -1,13 +1,65 @@
 
+enum ValueError {
+    case notUsed
+    case notChanged
+    case changedConst
+}
+
 class Value {
     var name: String
     var isStatic: Bool
+    var isUsed: Bool
+    var isPub: Bool
+    var isVar: Bool
+    var isChanged: Bool
+    var isType: Bool
     var access: Access
+    var belongTo: Scope? = nil
 
     init(_ name: String) {
         self.isStatic = false
+        self.isUsed = false
+        self.isPub = false
+        self.isVar = false
+        self.isChanged = false
+        self.isType = false
         self.access = ._internal
         self.name = name
+    }
+
+    convenience init(_ name: String, _ isType: Bool) {
+        self.init(name)
+        self.isType = isType
+    }
+
+    convenience init(_ name: String, _ isType: Bool, _ isPub: Bool) {
+        self.init(name, isType)
+        self.isPub = isPub
+    }
+
+    init(_ name: String, _ isType: Bool, _ isPub: Bool, _ access: Access) {
+        self.isStatic = false
+        self.isUsed = false
+        self.isPub = isPub
+        self.isVar = false
+        self.isChanged = false
+        self.isType = isType
+        self.access = access
+        self.name = name
+    }
+
+    func check() -> ValueError? {
+        if !isUsed {
+            return .notUsed
+        }
+        if isVar && !isChanged {
+            return .notChanged
+        }
+        if !isVar && isChanged {
+            return .changedConst
+        }
+        return nil
+
     }
 
     func str() -> String {
@@ -48,8 +100,6 @@ class Fn: Value, Equatable, Hashable {
 
     var isGeneric: Bool = false
     var genericTypes: [GenericType]? = nil
-
-    var belongTo: Var? = nil
 
     static func ==(_ my: Fn, _ other: Fn) -> Bool {
         return my.returns == other.returns && my.args == other.args
@@ -95,28 +145,28 @@ class Arg: Equatable, Hashable {
 
 class Var: Value, Equatable {
     var typ: Type
-    var isVar: Bool
-    var isType: Bool
-    var relatedTypeSymbol: TableForType?
-
     var const: Bool { !isVar }
 
     override init(_ name: String) {
         self.typ = Type()!
-        self.isVar = false
-        self.isType = false
-        self.relatedTypeSymbol = nil
         super.init(name)
     }
 
-    convenience init(_ type: Type, _ name: String, _ isVar: Bool) {
+    convenience init(_ type: Type, _ name: String, _ table: TableForType) {
+        self.init(type, name)
+    }
+
+    convenience init(_ type: Type, _ name: String) {
         self.init(name)
         self.typ = type
-        self.isVar = isVar
+    }
+
+    init(_ type: Type, _ name: String, _ isType: Bool, _ isPub: Bool, _ access: Access, _ table: TableForType) {
+        self.typ = type
+        super.init(name, isType, isPub, access)
     }
 
     func setTableForType(_ table: TableForType) {
-        relatedTypeSymbol = table
     }
 
     static func ==(_ left: Var, _ right: Var) -> Bool {
@@ -126,9 +176,6 @@ class Var: Value, Equatable {
     }
 
     func type() -> String {
-        if let rs = relatedTypeSymbol {
-            return typ.str() + " " + rs.type()
-        }
         return typ.str()
     }
 

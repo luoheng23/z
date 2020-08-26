@@ -283,14 +283,21 @@ class Scanner {
     return getStr(start)
   }
 
+  func getLineInfo(_ pos: Position) -> String {
+    return String(text[pos.lineBegin..<lastNewLinePos])
+  }
+
   func scan(_ skipWhitespace: Bool = true) -> Token {
     var tok: Token
     repeat {
       tok = scanBasic()
-      if tok.kind == .space || tok.kind == .nl {
-        continue
+      if tok.kind == .eof {
+        break
       }
-    } while tok.kind == .space || tok.kind == .nl
+      if !skipWhitespace || tok.kind != .space && tok.kind != .nl{
+        break
+      }
+    } while true
     prevTok = tok
     return prevTok!
   }

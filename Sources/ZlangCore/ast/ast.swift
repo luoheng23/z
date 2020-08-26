@@ -45,7 +45,7 @@ class Ast {
     }
 }
 
-class Decl: Ast {}
+class Decl: Stmt {}
 
 class Stmt: Ast {}
 

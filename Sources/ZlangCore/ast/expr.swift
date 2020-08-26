@@ -112,11 +112,15 @@ class EnumVal: Expr {
     }
 }
 
-class Tuple: Expr {
+class TupleExpr: Expr {
     var exprs: [Expr]
 
     var count: Int { exprs.count }
 
+    override init() {
+        self.exprs = []
+        super.init()
+    }
     init(_ exprs: [Expr], _ pos: Position) {
         self.exprs = exprs
         super.init(pos)
@@ -125,15 +129,15 @@ class Tuple: Expr {
     override func str() -> String {
         var str = exprs.map { expr in
             return expr.str()
-        }.joined(separator: ",")
+        }.joined(separator: ", ")
         str = "(" + str + ")"
-        return "Tuple(" + str + ")"
+        return "TupleExpr(" + str + ")"
     }
 
     override func text() -> String {
         let str = exprs.map { expr in
             return expr.text()
-        }.joined(separator: ",")
+        }.joined(separator: ", ")
         return "(" + str + ")"
     }
 }
@@ -165,6 +169,11 @@ class NameExpr: Expr {
         super.init(pos)
     }
 
+    init(_ name: String, _ pos: Position, _ type: Value) {
+        self.name = name
+        super.init(pos, [], type)
+    }
+
     override func str() -> String {
         return "NameExpr(\(name))"
     }
@@ -173,6 +182,8 @@ class NameExpr: Expr {
         return "\(name)"
     }
 }
+
+class NameDeclareExpr: NameExpr {}
 
 class InfixExpr: Expr {
     var left: Expr

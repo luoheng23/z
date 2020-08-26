@@ -4,7 +4,7 @@ extension Parser {
         var node: Expr
         switch(tok.kind) {
         case .key_true, .key_false:
-            node = BoolLiteral(bool: tok.kind == .key_true, tok.pos)
+            node = BoolLiteral(bool: tok.kind == .key_true, tok.pos, scope.find(Type.bool.rawValue) as! Var)
             next()
         case .key_nil:
             node = None(pos: tok.pos)
@@ -18,6 +18,9 @@ extension Parser {
             node = stringExpr()
         case .name:
             node = nameExpr()
+            if node is NameDeclareExpr {
+                return node
+            }
         case .key_func:
             node = funcExpr()
         case .number:
@@ -48,18 +51,18 @@ extension Parser {
         return node
     }
 
-    func stringExpr() -> Expr {
-        let node = StringLiteral(val: tok.lit, tok.pos)
+    func stringExpr() -> StringLiteral {
+        let node = StringLiteral(val: tok.lit, tok.pos, scope.find(Type.string.rawValue) as! Var)
         next()
         return node
     }
 
-    func numberExpr() -> Expr {
-        var node: Expr
+    func numberExpr() -> Literal {
+        var node: Literal
         if tok.lit.contains(where: [".", "e", "E", "p", "P"].contains) {
-            node = FloatLiteral(val: tok.lit, tok.pos)
+            node = FloatLiteral(val: tok.lit, tok.pos, scope.find(Type.double.rawValue) as! Var)
         } else {
-            node = IntegerLiteral(val: tok.lit, tok.pos)
+            node = IntegerLiteral(val: tok.lit, tok.pos, scope.find(Type.int.rawValue) as! Var)
         }
         next()
         return node
@@ -70,13 +73,13 @@ extension Parser {
         return EnumVal(val: checkName(), pos: tok.pos)
     }
     
-    func tupleExpr() -> Tuple {
+    func tupleExpr() -> TupleExpr {
         let pos = tok.pos
         check(.lpar)
         let n = exprList()
         pos.addPosition(tok.pos)
         check(.rpar)
-        return Tuple(n, pos)
+        return TupleExpr(n, pos)
     }
 
     func prefixExpr() -> PrefixExpr {
@@ -115,7 +118,12 @@ extension Parser {
     func nameExpr() -> Expr {
         let pos = tok.pos
         let name = checkName()
-        return NameExpr(name: name, pos: pos)
+        if tok.kind == .colon {
+            let typeExpr = expr()
+            return NameDeclareExpr(name, pos, typeExpr.type ?? Value(name))
+        }
+        let expr = NameExpr(name: name, pos: pos)
+        return expr
     }
 
     func funcExpr() -> Expr {

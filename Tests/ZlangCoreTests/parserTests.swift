@@ -111,13 +111,13 @@ final class ParserTests: XCTestCase {
         """
         let parser = Parser(str: str)
         parser.readFirstToken()
-        let first = parser.expr() as! Tuple
-        let second = parser.expr() as! Tuple
-        let third = parser.expr() as! Tuple
+        let first = parser.expr() as! TupleExpr
+        let second = parser.expr() as! TupleExpr
+        let third = parser.expr() as! TupleExpr
         let answer = str.split(separator: "\n")
-        XCTAssert(first.text() == answer[0], "Failed to parse Tuple: \(first.text()) != \(answer[0])")
-        XCTAssert(second.text() == answer[1], "Failed to parse Tuple: \(second.text()) != \(answer[1])")
-        XCTAssert(third.text() == answer[2], "Failed to parse Tuple: \(third.text()) != \(answer[2])")
+        XCTAssert(first.text() == answer[0], "Failed to parse TupleExpr: \(first.text()) != \(answer[0])")
+        XCTAssert(second.text() == answer[1], "Failed to parse TupleExpr: \(second.text()) != \(answer[1])")
+        XCTAssert(third.text() == answer[2], "Failed to parse TupleExpr: \(third.text()) != \(answer[2])")
     }
 
     func testPrefixExpr() {
@@ -172,6 +172,97 @@ final class ParserTests: XCTestCase {
         XCTAssert(right.text() == answer[2], "Failed to parse InfixExpr: \(right.text()) != \(answer[2])")
     }
 
+
+    func testVarAndConstDecl() {
+        let str = """
+        var s = 20
+        var (s, t) = (20, 30)
+        const s = 20
+        const (s, t) = (20, 30)
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        var first = parser.stmt() as! NameDecl
+        var second = parser.stmt() as! TupleDecl
+        let answer = str.split(separator: "\n")
+        XCTAssert(first.text() == answer[0], "Failed to parse VarAndConstDecl: \(first.text()) != \(answer[0])")
+        XCTAssert(second.text() == answer[1], "Failed to parse VarAndConstDecl: \(second.text()) != \(answer[1])")
+        first = parser.stmt() as! NameDecl
+        second = parser.stmt() as! TupleDecl
+        XCTAssert(first.text() == answer[2], "Failed to parse VarAndConstDecl: \(first.text()) != \(answer[2])")
+        XCTAssert(second.text() == answer[3], "Failed to parse VarAndConstDecl: \(second.text()) != \(answer[3])")
+    }
+
+    func testTypeDecl() {
+        let str = """
+        type s = 20
+        type s 20
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        let first = parser.stmt() as! TypeDecl
+        let second = parser.stmt() as! TypeDecl
+        let answer = str.split(separator: "\n")
+        XCTAssert(first.text() == answer[0], "Failed to parse TypeDecl: \(first.text()) != \(answer[0])")
+        XCTAssert(second.text() == answer[1], "Failed to parse TypeDecl: \(second.text()) != \(answer[1])")
+    }
+
+    func testStructDecl() {
+        let str = """
+        struct name {
+            var hello = 20
+            var good = 30
+        }
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        let first = parser.stmt() as! StructDecl
+        let answer = str
+        XCTAssert(first.text() == answer, "Failed to parse StructDecl: \(first.text()) != \(answer)")
+    }
+
+    func testEnumDecl() {
+        let str = """
+        enum name {
+            var hello = 20
+            var good = 30
+        }
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        let first = parser.stmt() as! EnumDecl
+        let answer = str
+        XCTAssert(first.text() == answer, "Failed to parse EnumDecl: \(first.text()) != \(answer)")
+    }
+
+    func testInterfaceDecl() {
+        let str = """
+        interface name {
+            var hello = 20
+            var good = 30
+        }
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        let first = parser.stmt() as! InterfaceDecl
+        let answer = str
+        XCTAssert(first.text() == answer, "Failed to parse InterfacetDecl: \(first.text()) != \(answer)")
+    }
+
+    func testImplDecl() {
+        let str = """
+        impl name {
+            var hello = 20
+            var good = 30
+        }
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        let first = parser.stmt() as! ImplDecl
+        let answer = str
+        XCTAssert(first.text() == answer, "Failed to parse ImpltDecl: \(first.text()) != \(answer)")
+    }
+
     static var allTests = [
         ("testInitParser", testInitParser),
         ("testReadFirstToken", testReadFirstToken),
@@ -184,5 +275,11 @@ final class ParserTests: XCTestCase {
         ("testSelectorExpr", testSelectorExpr),
         ("testIndexExpr", testIndexExpr),
         ("testInfixExpr", testInfixExpr),
+        ("testVarAndConstDecl", testVarAndConstDecl),
+        ("testTypeDecl", testTypeDecl),
+        ("testStructDecl", testStructDecl),
+        ("testEnumDecl", testEnumDecl),
+        ("testImplDecl", testImplDecl),
+        ("testInterfaceDecl", testInterfaceDecl),
     ]
 }

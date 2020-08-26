@@ -5,6 +5,7 @@ class Scope {
     var pos: Position
     var isTopScope: Bool { parent == nil }
     var table: TableForType
+    var owner: Var? = nil
 
     init(_ globalScope: Bool = false) {
         parent = nil
