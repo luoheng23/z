@@ -58,37 +58,6 @@ class Parser {
         scope = scope.parent!
     }
 
-    func parseBlock() -> [Stmt] {
-        openScope()
-        let stmts = parseBlockNoScope(false)
-        closeScope()
-        return stmts
-    }
-
-    func parseBlockNoScope(_ isTopLevel: Bool) -> [Stmt] {
-        check(.lcbr)
-        var stmts: [Stmt] = []
-        if tok.kind != .rcbr {
-            var c = 0
-            while (true) {
-                stmts.append(stmt(isTopLevel))
-                if [.eof, .rcbr].contains(tok.kind) {
-                    break
-                }
-                c += 1
-                if c > 1000000 {
-                    errorWithPos("parsed over \(c) statements from fn \(curFnName), the parser is probably stuck", 
-                                    tok.pos)
-                }
-            }
-        }
-
-        if isTopLevel {
-            // topLevelStatementEnd()
-        }
-        check(.rcbr)
-        return stmts
-    }
 
     func next() {
         preTok = tok
@@ -124,43 +93,12 @@ class Parser {
 
     func topStmt() -> Stmt {
         switch (tok.kind) {
-        case .key_pub:
-            switch (peekTok.kind) {
-            case .key_const:
-                return constDecl()
-            case .key_func:
-                return fnDecl()
-            case .key_struct:
-                return structDecl()
-            case .key_enum:
-                return enumDecl()
-            case .key_interface:
-                return interfaceDecl()
-            case .key_impl:
-                return implDecl()
-            case .key_type:
-                return typeDecl()
-            default:
-                error("wrong pub keyword usage")
-                return Stmt()
-            }
-        case .key_interface:
-            return interfaceDecl()
-        case .key_impl:
-            return implDecl()
+        case .key_const, .key_var, .key_func, .key_struct, .key_enum, .key_interface, .key_impl,    
+                .key_type:
+            return decl()
         case .key_import:
             errorWithPos("import can only be declared at the beginning of the file", tok.pos)
             return importStmt()
-        case .key_const:
-            return constDecl()
-        case .key_enum:
-            return enumDecl()
-        case .key_func:
-            return fnDecl()
-        case .key_struct:
-            return structDecl()
-        case .key_type:
-            return typeDecl()
         case .comment:
             return commentStmt()
         default:
@@ -196,19 +134,6 @@ class Parser {
         return comments
     }
 
-
-    func exprList() -> [Expr] {
-        var exprs: [Expr] = []
-        while (true) {
-            let expr = self.expr()
-            exprs.append(expr)
-            if tok.kind != .comma {
-                break
-            }
-            next()
-        }
-        return exprs
-    }
 
     func goStmt() -> Stmt {
         return Stmt()

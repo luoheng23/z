@@ -254,13 +254,28 @@ final class ParserTests: XCTestCase {
         impl name {
             var hello = 20
             var good = 30
+            var good: String = "20"
         }
         """
         let parser = Parser(str: str)
         parser.readFirstToken()
         let first = parser.stmt() as! ImplDecl
         let answer = str
-        XCTAssert(first.text() == answer, "Failed to parse ImpltDecl: \(first.text()) != \(answer)")
+        XCTAssert(first.text() == answer, "Failed to parse ImplDecl: \(first.text()) != \(answer)")
+    }
+
+    func testFnDecl() {
+        let str = """
+        fn hello(var a: Int, b: Int) {
+            var hello: String = "50"
+        }
+        """
+        let parser = Parser(str: str)
+        parser.readFirstToken()
+        // print(parser.stmt().str())
+        let first = parser.stmt() as! FnDecl
+        let answer = str
+        XCTAssert(first.text() == answer, "Failed to parse FnDecl: \(first.text()) != \(answer)")
     }
 
     static var allTests = [
@@ -279,7 +294,8 @@ final class ParserTests: XCTestCase {
         ("testTypeDecl", testTypeDecl),
         ("testStructDecl", testStructDecl),
         ("testEnumDecl", testEnumDecl),
-        ("testImplDecl", testImplDecl),
         ("testInterfaceDecl", testInterfaceDecl),
+        ("testImplDecl", testImplDecl),
+        ("testFnDecl", testFnDecl),
     ]
 }

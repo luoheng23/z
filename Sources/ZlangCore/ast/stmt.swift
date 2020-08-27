@@ -2,9 +2,9 @@
 class BlockStmt: Stmt {
     var stmts: [Stmt]
     
-    init(stmts: [Stmt]) {
+    init(stmts: [Stmt], _ pos: Position) {
         self.stmts = stmts
-        super.init()
+        super.init(pos)
     }
 
     override init() {
@@ -13,6 +13,36 @@ class BlockStmt: Stmt {
     }
     func append(_ stmt: Stmt) {
         stmts.append(stmt)
+    }
+
+    override func str() -> String {
+        var str = "BlockStmt({"
+        if stmts.count != 0 {
+            str += "\n"
+        }
+        str += stmts.map { stmt in
+            "    " + stmt.str()
+        }.joined(separator: "\n")
+        if stmts.count != 0 {
+            str += "\n"
+        }
+        str += "})"
+        return str
+    }
+
+    override func text() -> String {
+        var str = "{"
+        if stmts.count != 0 {
+            str += "\n"
+        }
+        str += stmts.map { stmt in
+            "    " + stmt.text()
+        }.joined(separator: "\n")
+        if stmts.count != 0 {
+            str += "\n"
+        }
+        str += "}"
+        return str
     }
 }
 
@@ -47,14 +77,14 @@ class AssignStmt: Stmt {
     var rightTypes: [Type] = []
 }
 
-class DeferStmt: Stmt {
-    var stmts: [Stmt] = []
+// class DeferStmt: Stmt {
+//     var blockStmt: BlockStmt
 
-    init(stmts: [Stmt]) {
-        self.stmts = stmts
-        super.init()
-    }
-}
+//     init(stmts: BlockStmt, _ pos: Position) {
+//         self.stmts = stmts
+//         super.init()
+//     }
+// }
 
 class GoStmt: Stmt {
     var callExpr: Expr = Expr()

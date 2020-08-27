@@ -1,53 +1,147 @@
 class TupleDecl: Decl {
-    var left: TupleExpr
+    var left: Names
     var right: TupleExpr?
     var isVar: Bool
     var word: String { isVar ? "var" : "const" }
 
-    init(_ left: TupleExpr, _ isVar: Bool = false) {
+    init(_ left: Names, _ pos: Position, _ isVar: Bool = false) {
         self.left = left
         self.isVar = isVar
         self.right = nil
+        super.init(pos)
     }
 
-    init(_ left: TupleExpr, _ right: TupleExpr, _ isVar: Bool = false) {
+    init(_ left: Names, _ pos: Position, _ right: TupleExpr, _ isVar: Bool = false) {
         self.left = left
         self.right = right
         self.isVar = isVar
-        let pos = left.pos
-        pos.addPosition(right.pos)
         super.init(pos)
     }
 
     override func str() -> String {
-        return "TupleDecl(\(word) \(left.str()) = \(right.str()))"
+        var str = "TupleDecl(\(word) \(left.str())"
+        if let r = right {
+            str += " = \(r.str())"
+        }
+        str += ")"
+        return str
     }
 
     override func text() -> String {
-        return "\(word) \(left.text()) = \(right.text())"
+        var str = "\(word) \(left.text())"
+        if let r = right {
+            str += " = \(r.text())"
+        }
+        return str
     }
 }
 
 class NameDecl: Decl {
-    var left: Expr
-    var right: Expr
-    var isVar: Bool
-    var word: String { isVar ? "var" : "const"}
+    var name: String
+    var typeAnnotation: Expr?
+    var defaultValue: Expr?
+    var isVar: Bool = false
+    var word: String { isVar ? "var" : "const" }
 
-    init(_ left: Expr, _ right: Expr, _ isVar: Bool = false) {
-        self.left = left
-        self.right = right
-        self.isVar = isVar
-        let pos = left.pos
-        pos.addPosition(right.pos)
+    init(_ name: String, _ pos: Position) {
+        self.name = name
+        self.typeAnnotation = nil
+        self.defaultValue = nil
         super.init(pos)
     }
+
+    init(_ name: String, _ pos: Position, _ typeAnnotation: Expr) {
+        self.name = name
+        self.typeAnnotation = typeAnnotation
+        super.init(pos)
+    }
+
+    init(_ name: String, _ pos: Position, defaultValue: Expr) {
+        self.name = name
+        self.defaultValue = defaultValue
+        self.typeAnnotation = nil
+        super.init(pos)
+    }
+
+    init(_ name: String, _ pos: Position, _ typeAnnotation: Expr, _ defaultValue: Expr) {
+        self.name = name
+        self.typeAnnotation = typeAnnotation
+        self.defaultValue = defaultValue
+        super.init(pos)
+    }
+
     override func str() -> String {
-        return "NameDecl(\(word) \(left.str()) = \(right.str()))"
+        return str(true)
+    }
+
+    func str(_ outputWord: Bool = true) -> String {
+        var str = "Name("
+        str += outputWord ? "\(word) \(name)" : name
+        if let t = typeAnnotation {
+            str += ": \(t.str())"
+        }
+        if let t = defaultValue {
+            str += " = \(t.str())"
+        }
+        str += ")"
+        return str
     }
 
     override func text() -> String {
-        return "\(word) \(left.text()) = \(right.text())"
+        return text(true)
+    }
+
+    func text(_ outputWord: Bool = true) -> String {
+        var str = outputWord ? "\(word) \(name)" : name
+        if let t = typeAnnotation {
+            str += ": \(t.text())"
+        }
+        if let t = defaultValue {
+            str += " = \(t.text())"
+        }
+        return str
+    }
+}
+
+class Names: Decl {
+    var names: [NameDecl]
+    var count: Int { names.count }
+    var isArg: Bool
+
+    override init() {
+        self.names = []
+        self.isArg = false
+        super.init()
+    }
+
+    init(_ names: [NameDecl], _ pos: Position, _ isArg: Bool = false) {
+        self.names = names
+        self.isArg = isArg
+        super.init(pos)
+    }
+
+    override func str() -> String {
+        var str = "Names(("
+        str += names.map { name in
+            if isArg && name.isVar {
+                return name.str(isArg)
+            }
+            return name.str(false)
+        }.joined(separator: ", ")
+        str += "))"
+        return str
+    }
+
+    override func text() -> String {
+        var str = "("
+        str += names.map { name in
+            if isArg && name.isVar {
+                return name.text(isArg)
+            }
+            return name.text(false)
+        }.joined(separator: ", ")
+        str += ")"
+        return str
     }
 }
 
@@ -83,15 +177,33 @@ class BlockDecl: Decl {
     }
 
     override func str() -> String {
-        return decls.map { decl in
-            return decl.str()
+        var str = "BlockDecl({"
+        if decls.count != 0 {
+            str += "\n"
+        }
+        str += decls.map { decl in
+            "    " + decl.str()
         }.joined(separator: "\n")
+        if decls.count != 0 {
+            str += "\n"
+        }
+        str += "})"
+        return str
     }
 
     override func text() -> String {
-        return decls.map { decl in
-            return decl.text()
+        var str = "{"
+        if decls.count != 0 {
+            str += "\n"
+        }
+        str += decls.map { decl in
+            "    " + decl.text()
         }.joined(separator: "\n")
+        if decls.count != 0 {
+            str += "\n"
+        }
+        str += "}"
+        return str
     }
 }
 
@@ -106,21 +218,11 @@ class StructDecl: Decl {
     }
 
     override func str() -> String {
-        var str = "StructDecl(struct \(name) {\n"
-        str += decls.str().split(separator: "\n").map { d in
-            return "    " + d
-        }.joined(separator: "\n")
-        str += "\n})"
-        return str
+        return "StructDecl(struct \(name) \(decls.str()))"
     }
 
     override func text() -> String {
-        var str = "struct \(name) {\n"
-        str += decls.text().split(separator: "\n").map { d in
-            return "    " + d
-        }.joined(separator: "\n")
-        str += "\n}"
-        return str
+        return "struct \(name) \(decls.text())"
     }
 }
 
@@ -135,23 +237,12 @@ class EnumDecl: Decl {
     }
 
     override func str() -> String {
-        var str = "EnumDecl(enum \(name) {\n"
-        str += decls.str().split(separator: "\n").map { d in
-            return "    " + d
-        }.joined(separator: "\n")
-        str += "\n})"
-        return str
+        return "EnumDecl(enum \(name) \(decls.str()))"
     }
 
     override func text() -> String {
-        var str = "enum \(name) {\n"
-        str += decls.text().split(separator: "\n").map { d in
-            return "    " + d
-        }.joined(separator: "\n")
-        str += "\n}"
-        return str
+        return "enum \(name) \(decls.text())"
     }
-
 }
 
 class InterfaceDecl: Decl {
@@ -165,24 +256,13 @@ class InterfaceDecl: Decl {
     }
 
     override func str() -> String {
-        var str = "InterfaceDecl(interface \(name) {\n"
-        str += decls.str().split(separator: "\n").map { d in
-            return "    " + d
-        }.joined(separator: "\n")
-        str += "\n})"
-        return str
+        return "InterfaceDecl(interface \(name) \(decls.str()))"
     }
 
     override func text() -> String {
-        var str = "interface \(name) {\n"
-        str += decls.text().split(separator: "\n").map { d in
-            return "    " + d
-        }.joined(separator: "\n")
-        str += "\n}"
-        return str
+        return "interface \(name) \(decls.text())"
     }
 }
-
 
 class ImplDecl: Decl {
     var name: String
@@ -195,32 +275,60 @@ class ImplDecl: Decl {
     }
 
     override func str() -> String {
-        var str = "ImplDecl(impl \(name) {\n"
-        str += decls.str().split(separator: "\n").map { d in
-            return "    " + d
-        }.joined(separator: "\n")
-        str += "\n})"
-        return str
+        return "ImplDecl(impl \(name) \(decls.str()))"
     }
 
     override func text() -> String {
-        var str = "impl \(name) {\n"
-        str += decls.text().split(separator: "\n").map { d in
-            return "    " + d
-        }.joined(separator: "\n")
-        str += "\n}"
-        return str
+        return "impl \(name) \(decls.text())"
     }
 }
 
+// class ArgDecl: Decl {
+//     var nameDecls: Names
+
+//     override init() {
+//         self.nameDecls = Names()
+//         super.init()
+//     }
+
+//     init(_ nameDecls: Names, _ pos: Position) {
+//         self.nameDecls = nameDecls
+//         super.init(pos)
+//     }
+
+//     override func str() -> String {
+//         var str = "ArgDecl(("
+//         str += nameDecls.names.map { name in
+//             if name.isVar {
+//                 return name.str()
+//             }
+//             return name.str(false)
+//         }.joined(separator: ", ")
+//         str += "))"
+//         return str
+//     }
+
+//     override func text() -> String {
+//         var str = "("
+//         str += nameDecls.names.map { name in
+//             print(name, name.isVar)
+//             if name.isVar {
+//                 return name.str()
+//             }
+//             return name.str(false)
+//         }.joined(separator: ", ")
+//         str += ")"
+//         return str
+//     }
+// }
 
 class FnDecl: Decl {
     var name: String
-    var args: TupleDecl
-    var returns: TupleDecl
+    var args: Names
+    var returns: Names
     var blockStmt: BlockStmt?
 
-    init(_ name: String, _ pos: Position, _ args: TupleDecl, _ returns: TupleDecl) {
+    init(_ name: String, _ pos: Position, _ args: Names, _ returns: Names) {
         self.name = name
         self.args = args
         self.returns = returns
@@ -228,13 +336,13 @@ class FnDecl: Decl {
         super.init(pos)
     }
 
-    convenience init(_ name: String, _ pos: Position, _ args: TupleDecl, _ returns: TupleDecl, _ blockStmt: BlockStmt) {
+    convenience init(_ name: String, _ pos: Position, _ args: Names, _ returns: Names, _ blockStmt: BlockStmt) {
         self.init(name, pos, args, returns)
         self.blockStmt = blockStmt
     }
 
     override func str() -> String {
-        var str = "func \(name)"
+        var str = "fn \(name)"
         str += "\(args.str()) \(returns.str())"
         if let stmt = blockStmt {
             str += stmt.str()
@@ -243,10 +351,13 @@ class FnDecl: Decl {
     }
 
     override func text() -> String {
-        var str = "func \(name)"
-        str += "\(args.text()) \(returns.text())"
+        var str = "fn \(name)"
+        str += "\(args.text())"
+        if returns.count != 0 {
+            str += " \(returns.text())"
+        }
         if let stmt = blockStmt {
-            str += stmt.text()
+            str += " \(stmt.text())"
         }
         return str
     }

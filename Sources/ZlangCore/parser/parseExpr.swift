@@ -134,4 +134,19 @@ extension Parser {
     func callExpr(_ left: Expr) -> Expr {
         return Expr()
     }
+
+    func exprList() -> [Expr] {
+        var exprs: [Expr] = []
+        while (true) {
+            if tok.kind == .rpar || tok.kind == .eof {
+                break
+            }
+            exprs.append(expr())
+            if tok.kind != .comma {
+                break
+            }
+            next()
+        }
+        return exprs
+    }
 }
