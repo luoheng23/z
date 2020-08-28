@@ -23,6 +23,10 @@ class Token {
     return "\(kind.str()) '\(lit)'"
   }
 
+  func text() -> String {
+    return "\(lit)"
+  }
+
   func isScalar() -> Bool {
     return [Kind.name, Kind.string].contains(kind)
   }

@@ -1,90 +1,93 @@
 
 extension Parser {
 
-    func nameDecl(_ annotationRequired: Bool = false) -> NameDecl {
+    func basicNameDecl(_ annotationRequired: Bool = false) -> OneNameAnnotationDecl {
         let pos = tok.pos
-        let name = checkName()
+        let name = nameExpr()
         var annotation: Expr? = nil
-        if annotationRequired || tok.kind == .colon {
-            check(.colon)
-            annotation = expr()
+        if annotationRequired || isTok(.name) {
+            annotation = nameExpr()
         }
         var defaultValue: Expr? = nil
-        if tok.kind == .assign {
+        if isTok(.assign) {
             check(.assign)
             defaultValue = expr()
         }
         if let a = annotation {
             if let d = defaultValue {
-                return NameDecl(name, pos, a, d)
+                return OneNameAnnotationDecl(name, pos, a, d)
             }
-            return NameDecl(name, pos, a)
+            return OneNameAnnotationDecl(name, pos, a)
         }
         if let d = defaultValue {
-            return NameDecl(name, pos, defaultValue: d)
+            return OneNameAnnotationDecl(name, pos, defaultValue: d)
         }
-        return NameDecl(name, pos)
+        return OneNameAnnotationDecl(name, pos)
     }
 
-    func names(_ annotationRequired: Bool = false) -> [NameDecl] {
-        var names: [NameDecl] = []
-        while (true) {
-            if tok.kind == .rpar || tok.kind == .eof {
-                break
-            }
-            if tok.kind == .key_var {
-                names.append(varOrConstDecl(true) as! NameDecl)
-            } else {
-                names.append(nameDecl(annotationRequired))
-            }
-            if tok.kind != .comma {
-                break
-            }
-            next()
-        }
-        return names
-    }
-
-    func args(_ annotationRequired: Bool = false) -> Names {
+    func nameDecl() -> NameDecl {
         let pos = tok.pos
-        check(.lpar)
-        let left = self.names(annotationRequired)
-        pos.addPosition(tok.pos)
-        check(.rpar)
-        return Names(left, pos, annotationRequired)
-    }
-
-    func varOrConstDecl(_ mustSingleDecl: Bool = false) -> Decl {
-        var isVar: Bool = false
-        if tok.kind == .key_var {
+        let isVar = isTok(.key_var)
+        if isVar {
             check(.key_var)
-            isVar = true
         } else {
             check(.key_const)
         }
-        let pos = tok.pos
-        if !mustSingleDecl && tok.kind == .lpar {
-            let left = args()
-            if tok.kind == .assign {
-                check(.assign)
-                let right = tupleExpr()
-                pos.addPosition(right.pos)
-                return TupleDecl(left, pos, right, isVar)
-            }
-            return TupleDecl(left, pos, isVar)
-        }
-        let name = nameDecl()
-        name.isVar = isVar
-        return name
+        let basicName = basicNameDecl(false)
+        basicName.isVar = isVar
+        pos.addPosition(basicName.pos)
+        return NameDecl(basicName, pos)
     }
 
-    // func varDecl() -> Decl {
-    //     return varOrConstDecl(true)
-    // }
+    func argDecl() -> ArgDecl {
+        let pos = tok.pos
+        let isVar = isTok(.key_var)
+        if isVar {
+            check(.key_var)
+        }
+        let basicName = basicNameDecl(true)
+        basicName.isVar = isVar
+        pos.addPosition(basicName.pos)
+        return ArgDecl(basicName, pos)
+    }
 
-    // func constDecl() -> Decl {
-    //     return varOrConstDecl()
-    // }
+    func tupleArgDecl() -> TupleArgDecl {
+        let pos = tok.pos
+        check(.lpar)
+        let args = basicTupleExpr(argDecl)
+        pos.addPosition(tok.pos)
+        check(.rpar)
+        return TupleArgDecl(args, pos)
+    }
+
+    func tupleNameDecl() -> TupleNameDecl {
+        let pos = tok.pos
+        let isVar = isTok(.key_var)
+        if isVar {
+            check(.key_var)
+        } else {
+            check(.key_const)
+        }
+        check(.lpar)
+        let left = basicTupleExpr(nameDecl)
+        var right: TupleExpr? = nil
+        if isTok(.assign) {
+            right = tupleExpr()
+        }
+        pos.addPosition(tok.pos)
+        check(.rpar)
+        if let r = right {
+            return TupleNameDecl(left, pos, r, isVar)
+        }
+        return TupleNameDecl(left, pos, isVar)
+    }
+
+    func varOrConstDecl() -> Decl {
+        if isNextTok(.lpar) {
+            return tupleNameDecl()
+        }
+        return nameDecl()
+    }
 
     func decl() -> Decl {
         switch (tok.kind) {
@@ -109,48 +112,49 @@ extension Parser {
     }
 
     func typeDecl() -> TypeDecl {
-        check(.key_type)
         let pos = tok.pos
-        let name = checkName()
-        let isAlias = tok.kind == .assign
+        check(.key_type)
+        let name = nameExpr()
+        let isAlias = isTok(.assign)
         if isAlias {
-            next()
+            check(.assign)
         }
         let type = expr()
+        pos.addPosition(type.pos)
         return TypeDecl(name, pos, type, isAlias)
     } 
-
-    func commentStmt() -> Comment {
-        return Comment()
-    }
 
     func fnDecl() -> Decl {
         let pos = tok.pos
         check(.key_func)
-        let name = checkName()
-        let args = self.args(true)
-        var returns: Names
-        if tok.kind == .lpar {
-            returns = self.args(true)
-            pos.addPosition(returns.pos)
-        } else {
-            returns = Names([], pos)
+        let name = nameExpr()
+        let args = tupleArgDecl()
+        var returns: TupleArgDecl?
+        if isTok(.lpar) {
+            returns = tupleArgDecl()
+            pos.addPosition(returns!.pos)
         }
         var blockStmt: BlockStmt?
-        if tok.kind == .lcbr {
+        if isTok(.lcbr) {
             blockStmt = self.blockStmt()
         }
         if let b = blockStmt {
             pos.addPosition(b.pos)
-            return FnDecl(name, pos, args, returns, b)
+            if let r = returns {
+                return FnDecl(name, pos, args, r, b)
+            }
+            return FnDecl(name, pos, args, body: b)
         }
-        return FnDecl(name, pos, args, returns)
+        if let r = returns {
+            return FnDecl(name, pos, args, r)
+        }
+        return FnDecl(name, pos, args)
     }
 
     func structDecl() -> StructDecl {
         let pos = tok.pos
         check(.key_struct)
-        let name = checkName()
+        let name = nameExpr()
         let decls = blockDecls()
         return StructDecl(name, pos, decls)
     }
@@ -158,7 +162,7 @@ extension Parser {
     func enumDecl() -> Decl {
         let pos = tok.pos
         check(.key_enum)
-        let name = checkName()
+        let name = nameExpr()
         let decls = blockDecls()
         return EnumDecl(name, pos, decls)
     }
@@ -182,14 +186,14 @@ extension Parser {
             }
         }
         pos.addPosition(tok.pos)
-        next()
+        check(.rcbr)
         return BlockDecl(decls, pos)
     }
 
     func interfaceDecl() -> Decl {
         let pos = tok.pos
         check(.key_interface)
-        let name = checkName()
+        let name = nameExpr()
         let decls = blockDecls()
         return InterfaceDecl(name, pos, decls)
     }
@@ -197,7 +201,7 @@ extension Parser {
     func implDecl() -> Decl {
         let pos = tok.pos
         check(.key_impl)
-        let name = checkName()
+        let name = nameExpr()
         let decls = blockDecls()
         return ImplDecl(name, pos, decls)
     }

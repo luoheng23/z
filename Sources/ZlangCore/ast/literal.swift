@@ -1,8 +1,8 @@
 
 class Literal: Expr {
-    let val: String
+    let val: Token
 
-    init(_ val: String, _ pos: Position) {
+    init(val: Token, _ pos: Position) {
         self.val = val
         super.init(pos)
     }
@@ -11,7 +11,7 @@ class Literal: Expr {
         return "\(node)(\(text()))"
     }
     override func text() -> String {
-        return val
+        return val.lit
     }
 }
 

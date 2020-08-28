@@ -1,19 +1,19 @@
 
 // atom name
 class NameExpr: Expr {
-    var name: String
+    var name: Token
 
-    init(name: String, pos: Position) {
+    init(name: Token, pos: Position) {
         self.name = name
         super.init(pos)
     }
 
     override func str() -> String {
-        return "\(node)(\(name))"
+        return "\(node)(\(name.str()))"
     }
 
     override func text() -> String {
-        return "\(name)"
+        return "\(name.text())"
     }
 }
 
@@ -59,19 +59,19 @@ class CallExpr: AtomExpr {
 }
 
 class EnumValueExpr: Expr {
-    var val: String
+    var val: NameExpr
 
-    init(val: String, pos: Position) {
+    init(val: NameExpr, _ pos: Position) {
         self.val = val
         super.init(pos)
     }
 
     override func str() -> String {
-        return "\(node)(.\(val))"
+        return "\(node)(text())"
     }
 
     override func text() -> String {
-        return ".\(val)"
+        return ".\(val.str())"
     }
 }
 
@@ -91,7 +91,7 @@ class TupleExpr: Expr {
     }
 
     override func str() -> String {
-        var str = exprs.map { expr in expr.str() }.joined(separator: ", ")
+        let str = exprs.map { expr in expr.str() }.joined(separator: ", ")
         return "\(node)((\(str)))"
     }
 

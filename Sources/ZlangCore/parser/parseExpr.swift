@@ -4,23 +4,18 @@ extension Parser {
         var node: Expr
         switch(tok.kind) {
         case .key_true, .key_false:
-            node = BoolLiteral(bool: tok.kind == .key_true, tok.pos, scope.find(Type.bool.rawValue) as! Var)
+            node = BoolLiteral(val: tok, tok.pos)
             next()
         case .key_nil:
-            node = None(pos: tok.pos)
-        case .comment:
-            node = self.comment()
+            node = NoneLiteral(val: tok, tok.pos)
         case .dot:
-            node = enumVal()
+            node = enumValueExpr()
         case .lpar:
             node = tupleExpr()
         case .string:
             node = stringExpr()
         case .name:
             node = nameExpr()
-            if node is NameDeclareExpr {
-                return node
-            }
         case .key_func:
             node = funcExpr()
         case .number:
@@ -52,25 +47,25 @@ extension Parser {
     }
 
     func stringExpr() -> StringLiteral {
-        let node = StringLiteral(val: tok.lit, tok.pos, scope.find(Type.string.rawValue) as! Var)
-        next()
+        let node = StringLiteral(val: tok, tok.pos)
+        check(.unknown, true)
         return node
     }
 
     func numberExpr() -> Literal {
         var node: Literal
         if tok.lit.contains(where: [".", "e", "E", "p", "P"].contains) {
-            node = FloatLiteral(val: tok.lit, tok.pos, scope.find(Type.double.rawValue) as! Var)
+            node = FloatLiteral(val: tok, tok.pos)
         } else {
-            node = IntegerLiteral(val: tok.lit, tok.pos, scope.find(Type.int.rawValue) as! Var)
+            node = IntegerLiteral(val: tok, tok.pos)
         }
-        next()
+        check(.unknown, true)
         return node
     }
 
-    func enumVal() -> EnumVal {
+    func enumValueExpr() -> EnumValueExpr {
         check(.dot)
-        return EnumVal(val: checkName(), pos: tok.pos)
+        return EnumValueExpr(val: nameExpr(), tok.pos)
     }
     
     func tupleExpr() -> TupleExpr {
@@ -99,10 +94,24 @@ extension Parser {
         return InfixExpr(left: left, right: right, op: op, pos: pos)
     }
 
-    func dotExpr(_ left: Expr) -> SelectorExpr {
+    func dotExpr(_ left: Expr) -> DotExpr {
         check(.dot)
-        let fieldName = check(.name)
-        return SelectorExpr(left, fieldName, tok.pos)
+        let field = nameExpr()
+        return DotExpr(left, field, tok.pos)
+    }
+
+    func basicTupleExpr<T>(_ exprFunc: () -> T) -> [T] {
+        var res: [T] = []
+        while (true) {
+            if [.rpar, .eof].contains(tok.kind) {
+                break
+            }
+            res.append(exprFunc())
+            if tok.kind != .comma {
+                break
+            }
+        }
+        return res
     }
 
     func indexExpr(_ left: Expr) -> IndexExpr {
@@ -114,9 +123,9 @@ extension Parser {
         return IndexExpr(left, fieldExpr, pos)
     }
 
-    func nameExpr() -> Expr {
+    func nameExpr() -> NameExpr {
         let pos = tok.pos
-        let name = checkName()
+        let name = check(.name)
         let expr = NameExpr(name: name, pos: pos)
         return expr
     }

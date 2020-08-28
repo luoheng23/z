@@ -20,9 +20,7 @@ extension Parser {
         //     next()
         //     return DeferStmt(stmts: blockStmt(), )
         case .key_go:
-            next()
-            let expr = self.expr()
-            return GoStmt(callExpr: expr)
+            return goStmt()
         default:
             return Stmt()
         }
@@ -54,5 +52,30 @@ extension Parser {
         pos.addPosition(tok.pos)
         check(.rcbr)
         return BlockStmt(stmts: stmts, pos)
+    }
+
+    func goStmt() -> Stmt {
+        return Stmt()
+    }
+
+    func deferStmt() -> Stmt {
+        return Stmt()
+    }
+
+    func returnStmt() -> Stmt {
+        return Stmt()
+    }
+
+    func forStmt() -> Stmt {
+        return Stmt()
+    }
+
+
+    func importStmt() -> Stmt {
+        return Stmt()
+    }
+
+    func commentStmt() -> CommentStmt {
+        return CommentStmt()
     }
 }

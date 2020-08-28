@@ -74,7 +74,9 @@ class AssignStmt: Stmt {
 // }
 
 class GoStmt: Stmt {
-    init(callExpr: Expr, _ pos: Position) {
+    var callExpr: Expr
+
+    init(_ callExpr: Expr, _ pos: Position) {
         self.callExpr = callExpr
         super.init(pos)
     }
@@ -124,3 +126,4 @@ class ReturnStmt: Stmt {
     var expr: Expr = Expr()
 }
 
+class CommentStmt: Stmt {}

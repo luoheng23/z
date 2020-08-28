@@ -1,11 +1,10 @@
 
 class Parser {
 
-    static var limitedErrors = 20
-    static var limitedWarnings = 20
+    static var limitedErrors = 1
+    static var limitedWarnings = 1
 
     var filePath: String
-    var fileNameDir: String = ""
     
     var scanner: Scanner
     var tok: Token = Token()
@@ -23,7 +22,7 @@ class Parser {
     var errors: [Error] = []
     var warnings: [Warning] = []
 
-    var comments: [Comment] = []
+    var comments: CommentStmt? = nil
 
     var fnName: String = ""
 
@@ -41,7 +40,7 @@ class Parser {
 
     func readFirstToken() {
         for _ in 1...4 {
-            next()
+            check(.unknown, true)
         }
     }
 
@@ -74,82 +73,21 @@ class Parser {
         }
     }
 
-    func check(_ expected: Kind) {
-        if tok.kind != expected {
+    @discardableResult
+    func check(_ expected: Kind, _ skip: Bool = false) -> Token {
+        if !skip && !isTok(expected) {
             error("unexpected \(tok.str()), expecting \(expected.str())")
+            return Token()
         }
         next()
+        return preTok
     }
 
-    func checkName() -> String {
-        let name = tok.lit
-        check(.name)
-        return name
+    func isTok(_ expected: Kind) -> Bool {
+        return tok.kind == expected
     }
 
-    func topStmt() -> Stmt {
-        switch (tok.kind) {
-        case .key_const, .key_var, .key_func, .key_struct, .key_enum, .key_interface, .key_impl,    
-                .key_type:
-            return decl()
-        case .key_import:
-            errorWithPos("import can only be declared at the beginning of the file", tok.pos)
-            return importStmt()
-        case .comment:
-            return commentStmt()
-        default:
-            error("bad top level statement " + tok.str())
-        }
-        return Decl()
+    func isNextTok(_ expected: Kind) -> Bool {
+        return peekTok.kind == expected
     }
-
-    func checkComment() -> Comment {
-        if tok.kind == .comment {
-            return comment()
-        }
-        return Comment()
-    }
-
-    func comment() -> Comment {
-        let pos = tok.pos
-        let text = tok.lit
-        next()
-        return Comment(text: text, pos: pos)
-    }
-
-    func commentStmt() -> ExprStmt {
-        let comment = self.comment()
-        return ExprStmt(expr: comment, isComment: true)
-    }
-
-    func allComments() -> [Comment] {
-        var comments: [Comment] = []
-        while tok.kind == .comment {
-            comments.append(comment())
-        }
-        return comments
-    }
-
-
-    func goStmt() -> Stmt {
-        return Stmt()
-    }
-
-    func deferStmt() -> Stmt {
-        return Stmt()
-    }
-
-    func returnStmt() -> Stmt {
-        return Stmt()
-    }
-
-    func forStmt() -> Stmt {
-        return Stmt()
-    }
-
-
-    func importStmt() -> Stmt {
-        return Stmt()
-    }
-
 }
