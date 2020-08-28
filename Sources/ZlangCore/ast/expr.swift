@@ -1,110 +1,73 @@
 
-class SelectorExpr: Expr {
-    var expr: Expr
-    var fieldName: String = ""
+// atom name
+class NameExpr: Expr {
+    var name: String
 
-    init(_ expr: Expr, _ fieldName: String, _ pos: Position) {
-        self.expr = expr
-        self.fieldName = fieldName
+    init(name: String, pos: Position) {
+        self.name = name
         super.init(pos)
     }
 
     override func str() -> String {
-        return "SelectorExpr(\(expr.str()).\(fieldName))"
+        return "\(node)(\(name))"
     }
 
     override func text() -> String {
-        return "\(expr.text()).\(fieldName)"
+        return "\(name)"
     }
 }
 
-class IndexExpr: Expr {
-    var expr: Expr
-    var fieldExpr: Expr
+class AtomExpr: Expr {
+    var left: Expr
+    var field: Expr
 
-    init(_ expr: Expr, _ fieldExpr: Expr, _ pos: Position) {
-        self.expr = expr
-        self.fieldExpr = fieldExpr
+    init(_ left: Expr, _ field: Expr, _ pos: Position) {
+        self.left = left
+        self.field = field
         super.init(pos)
     }
+}
 
+class DotExpr: AtomExpr {
     override func str() -> String {
-        return "IndexExpr(\(expr.str())[\(fieldExpr.str())])"
+        return "\(node)(\(left.str()).\(field))"
     }
 
     override func text() -> String {
-        return "\(expr.text())[\(fieldExpr.text())]"
+        return "\(left.text()).\(field)"
     }
 }
 
-
-
-
-
-
-
-class CallExpr: Expr {
-    var left: Expr = Expr()
-    var mod: String = ""
-
-    var name: String = ""
-    var isMethod: Bool = false
-    var isField: Bool = false
-    var args: [CallArg] = []
-    var expectedArgTypes: [Type] = []
-}
-
-class CallArg {
-    var isVar: Bool = false
-    var expr: Expr = Expr()
-}
-
-class Comment: Expr {
-    var comment: String
-
-    override init() {
-        self.comment = ""
-        super.init()
-    }
-
-    init(text: String, pos: Position) {
-        self.comment = text
-        super.init(pos)
-    }
-
+class IndexExpr: AtomExpr {
     override func str() -> String {
-        return "Comment(\(comment))"
+        return "\(node)(\(left.str())[\(field.str())])"
     }
 
     override func text() -> String {
-        return "\(comment)"
+        return "\(left.text())[\(field.text())]"
     }
 }
 
-class None: Expr {
-    init(pos: Position) {
-        super.init(pos)
-    }
-
+class CallExpr: AtomExpr {
     override func str() -> String {
-        return "None(nil)"
+        return "\(node)(\(left.str())\(field.str()))"
     }
 
     override func text() -> String {
-        return "nil"
+        return "\(left.text())\(field.text())"
     }
 }
 
-class EnumVal: Expr {
+class EnumValueExpr: Expr {
     var val: String
 
-    init(val: String, pos: Position, associatedValue: String = "") {
+    init(val: String, pos: Position) {
         self.val = val
         super.init(pos)
     }
 
     override func str() -> String {
-        return "EnumVal(.\(val))"
+        return "\(node)(.\(val))"
     }
 
     override func text() -> String {
@@ -121,24 +84,20 @@ class TupleExpr: Expr {
         self.exprs = []
         super.init()
     }
+
     init(_ exprs: [Expr], _ pos: Position) {
         self.exprs = exprs
         super.init(pos)
     }
 
     override func str() -> String {
-        var str = exprs.map { expr in
-            return expr.str()
-        }.joined(separator: ", ")
-        str = "(" + str + ")"
-        return "TupleExpr(" + str + ")"
+        var str = exprs.map { expr in expr.str() }.joined(separator: ", ")
+        return "\(node)((\(str)))"
     }
 
     override func text() -> String {
-        let str = exprs.map { expr in
-            return expr.text()
-        }.joined(separator: ", ")
-        return "(" + str + ")"
+        let str = exprs.map { expr in expr.text() }.joined(separator: ", ")
+        return "(\(str))"
     }
 }
 
@@ -149,41 +108,17 @@ class PrefixExpr: Expr {
     init(op: Kind, right: Expr, _ pos: Position) {
         self.op = op
         self.right = right
-        super.init(pos, [], right.type ?? Var(""))
-    }
-
-    override func str() -> String {
-        return "PrefixExpr(\(op.rawValue)\(right.str()))"
-    }
-
-    override func text() -> String {
-        return "\(op.rawValue)\(right.text())"
-    }
-}
-
-class NameExpr: Expr {
-    var name: String
-
-    init(name: String, pos: Position) {
-        self.name = name
         super.init(pos)
     }
 
-    init(_ name: String, _ pos: Position, _ type: Value) {
-        self.name = name
-        super.init(pos, [], type)
-    }
-
     override func str() -> String {
-        return "NameExpr(\(name))"
+        return "\(node)(\(op.str())\(right.str()))"
     }
 
     override func text() -> String {
-        return "\(name)"
+        return "\(op.str())\(right.text())"
     }
 }
-
-class NameDeclareExpr: NameExpr {}
 
 class InfixExpr: Expr {
     var left: Expr
@@ -194,14 +129,35 @@ class InfixExpr: Expr {
         self.left = left
         self.op = op
         self.right = right
-        super.init(pos, [], right.type ?? Var(""))
+        super.init(pos)
     }
 
     override func str() -> String {
-        return "InfixExpr(\(left.str())\(op.rawValue)\(right.str()))"
+        return "\(node)(\(left.str())\(op.str())\(right.str()))"
     }
 
     override func text() -> String {
-        return "\(left.text())\(op.rawValue)\(right.text())"
+        return "\(left.text())\(op.str())\(right.text())"
+    }
+}
+
+class IfElseExpr: Expr {
+    var cond: Expr
+    var trueBranch: Expr
+    var falseBranch: Expr
+
+    init(_ cond: Expr, _ trueBranch: Expr, _ falseBranch: Expr, _ pos: Position) {
+        self.cond = cond
+        self.trueBranch = trueBranch
+        self.falseBranch = falseBranch
+        super.init(pos)
+    }
+
+    override func str() -> String {
+        return "\(node)(\(cond.str()) ? \(trueBranch.str()) : \(falseBranch.str()))"
+    }
+
+    override func text() -> String {
+        return "\(cond.text()) ? \(trueBranch.text()) : \(falseBranch.text())"
     }
 }

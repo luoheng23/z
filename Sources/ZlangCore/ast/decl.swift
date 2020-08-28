@@ -1,84 +1,46 @@
-class TupleDecl: Decl {
-    var left: Names
-    var right: TupleExpr?
-    var isVar: Bool
-    var word: String { isVar ? "var" : "const" }
-
-    init(_ left: Names, _ pos: Position, _ isVar: Bool = false) {
-        self.left = left
-        self.isVar = isVar
-        self.right = nil
-        super.init(pos)
-    }
-
-    init(_ left: Names, _ pos: Position, _ right: TupleExpr, _ isVar: Bool = false) {
-        self.left = left
-        self.right = right
-        self.isVar = isVar
-        super.init(pos)
-    }
-
-    override func str() -> String {
-        var str = "TupleDecl(\(word) \(left.str())"
-        if let r = right {
-            str += " = \(r.str())"
-        }
-        str += ")"
-        return str
-    }
-
-    override func text() -> String {
-        var str = "\(word) \(left.text())"
-        if let r = right {
-            str += " = \(r.text())"
-        }
-        return str
-    }
-}
-
-class NameDecl: Decl {
-    var name: String
+class OneNameAnnotationDecl: Decl {
+    var name: NameExpr
     var typeAnnotation: Expr?
     var defaultValue: Expr?
-    var isVar: Bool = false
-    var word: String { isVar ? "var" : "const" }
+    var isVar: Bool
+    var word: String = ""
 
-    init(_ name: String, _ pos: Position) {
+    init(_ name: NameExpr, _ pos: Position, _ isVar: Bool) {
         self.name = name
         self.typeAnnotation = nil
+        self.defaultValue = nil
+        self.isVar = isVar
+        super.init(pos)
+    }
+
+    init(_ name: NameExpr, _ pos: Position, _ typeAnnotation: Expr, _ isVar: Bool) {
+        self.name = name
+        self.typeAnnotation = typeAnnotation
+        self.isVar = isVar
         self.defaultValue = nil
         super.init(pos)
     }
 
-    init(_ name: String, _ pos: Position, _ typeAnnotation: Expr) {
-        self.name = name
-        self.typeAnnotation = typeAnnotation
-        super.init(pos)
-    }
-
-    init(_ name: String, _ pos: Position, defaultValue: Expr) {
+    init(_ name: NameExpr, _ pos: Position, defaultValue: Expr, _ isVar: Bool) {
         self.name = name
         self.defaultValue = defaultValue
+        self.isVar = isVar
         self.typeAnnotation = nil
         super.init(pos)
     }
 
-    init(_ name: String, _ pos: Position, _ typeAnnotation: Expr, _ defaultValue: Expr) {
+    init(_ name: NameExpr, _ pos: Position, _ typeAnnotation: Expr, _ defaultValue: Expr, _ isVar: Bool) {
         self.name = name
         self.typeAnnotation = typeAnnotation
         self.defaultValue = defaultValue
+        self.isVar = isVar
         super.init(pos)
     }
 
     override func str() -> String {
-        return str(true)
-    }
-
-    func str(_ outputWord: Bool = true) -> String {
-        var str = "Name("
-        str += outputWord ? "\(word) \(name)" : name
+        var str = "\(node)(\(word)\(name)"
         if let t = typeAnnotation {
-            str += ": \(t.str())"
+            str += " \(t.str())"
         }
         if let t = defaultValue {
             str += " = \(t.str())"
@@ -88,13 +50,9 @@ class NameDecl: Decl {
     }
 
     override func text() -> String {
-        return text(true)
-    }
-
-    func text(_ outputWord: Bool = true) -> String {
-        var str = outputWord ? "\(word) \(name)" : name
+        var str = "\(word)\(name)"
         if let t = typeAnnotation {
-            str += ": \(t.text())"
+            str += " \(t.text())"
         }
         if let t = defaultValue {
             str += " = \(t.text())"
@@ -103,44 +61,75 @@ class NameDecl: Decl {
     }
 }
 
-class Names: Decl {
-    var names: [NameDecl]
-    var count: Int { names.count }
-    var isArg: Bool
+class NameDecl: OneNameAnnotationDecl {
+    override var word: String { isVar ? "var " : "const " }
+}
 
-    override init() {
-        self.names = []
-        self.isArg = false
-        super.init()
+class ArgDecl: OneNameAnnotationDecl {
+    override var word: String { isVar ? "var " : "" }
+}
+
+class TupleArgDecl: Decl {
+    var args: [ArgDecl]
+
+    init(_ args: [ArgDecl], _ pos: Position) {
+        self.args = args
+        super.init(pos)
     }
 
-    init(_ names: [NameDecl], _ pos: Position, _ isArg: Bool = false) {
-        self.names = names
-        self.isArg = isArg
+    init(_ args: [ArgDecl], _ pos: Position) {
+        self.args = args
         super.init(pos)
     }
 
     override func str() -> String {
-        var str = "Names(("
-        str += names.map { name in
-            if isArg && name.isVar {
-                return name.str(isArg)
-            }
-            return name.str(false)
-        }.joined(separator: ", ")
-        str += "))"
+        var str = args.map { arg in arg.str() }.joined(separator: ", ")
+        return "\(node)((\(str)))"
+    }
+
+    override func text() -> String {
+        var str = args.map { arg in arg.text() }.joined(separator: ", ")
+        return "(\(str))"
+    }
+
+}
+
+class TupleNameDecl: Decl {
+    var left: [OneNameAnnotationDecl]
+    var right: TupleExpr?
+    var isVar: Bool
+    var word: String { isVar ? "var" : "const" }
+
+    init(_ left: [OneNameAnnotationDecl], _ pos: Position, _ isVar: Bool = false) {
+        self.left = left
+        self.isVar = isVar
+        self.right = nil
+        super.init(pos)
+    }
+
+    init(_ left: [OneNameAnnotationDecl], _ pos: Position, _ right: TupleExpr, _ isVar: Bool = false) {
+        self.left = left
+        self.right = right
+        self.isVar = isVar
+        super.init(pos)
+    }
+
+    override func str() -> String {
+        var str = left.map { arg in arg.text() }.joined(separator: ", ")
+        str = "\(node)(\(word) \(str)"
+        if let r = right {
+            str += " = \(r.str())"
+        }
+        str += ")"
         return str
     }
 
     override func text() -> String {
-        var str = "("
-        str += names.map { name in
-            if isArg && name.isVar {
-                return name.text(isArg)
-            }
-            return name.text(false)
-        }.joined(separator: ", ")
-        str += ")"
+        var str = left.map { arg in arg.text() }.joined(separator: ", ")
+        str = "\(word) \(str)"
+        if let r = right {
+            str += " = \(r.text())"
+        }
         return str
     }
 }
@@ -160,7 +149,7 @@ class TypeDecl: Decl {
     }
 
     override func str() -> String {
-        return "TypeDecl(type \(name)\(word) \(referenceType.str()))"
+        return "\(node)(type \(name)\(word) \(referenceType.str()))"
     }
 
     override func text() -> String {
@@ -177,13 +166,11 @@ class BlockDecl: Decl {
     }
 
     override func str() -> String {
-        var str = "BlockDecl({"
+        var str = "\(node)({"
         if decls.count != 0 {
             str += "\n"
         }
-        str += decls.map { decl in
-            "    " + decl.str()
-        }.joined(separator: "\n")
+        str += decls.map { decl in "    " + decl.str() }.joined(separator: "\n")
         if decls.count != 0 {
             str += "\n"
         }
@@ -196,9 +183,7 @@ class BlockDecl: Decl {
         if decls.count != 0 {
             str += "\n"
         }
-        str += decls.map { decl in
-            "    " + decl.text()
-        }.joined(separator: "\n")
+        str += decls.map { decl in "    " + decl.text() }.joined(separator: "\n")
         if decls.count != 0 {
             str += "\n"
         }
@@ -207,8 +192,9 @@ class BlockDecl: Decl {
     }
 }
 
-class StructDecl: Decl {
+class CombinationDecl: Decl {
     var name: String
+    var typeName: String = ""
     var decls: BlockDecl
 
     init(_ name: String, _ pos: Position, _ decls: BlockDecl) {
@@ -218,117 +204,44 @@ class StructDecl: Decl {
     }
 
     override func str() -> String {
-        return "StructDecl(struct \(name) \(decls.str()))"
+        return "\(node)(\(typeName) \(name) \(decls.str()))"
     }
 
     override func text() -> String {
-        return "struct \(name) \(decls.text())"
+        return "\(typeName) \(name) \(decls.text())"
     }
+
 }
 
-class EnumDecl: Decl {
-    var name: String
-    var decls: BlockDecl
-
-    init(_ name: String, _ pos: Position, _ decls: BlockDecl) {
-        self.decls = decls
-        self.name = name
-        super.init(pos)
-    }
-
-    override func str() -> String {
-        return "EnumDecl(enum \(name) \(decls.str()))"
-    }
-
-    override func text() -> String {
-        return "enum \(name) \(decls.text())"
-    }
+class StructDecl: CombinationDecl {
+    override var typeName: String = "struct"
 }
 
-class InterfaceDecl: Decl {
-    var name: String
-    var decls: BlockDecl
-
-    init(_ name: String, _ pos: Position, _ decls: BlockDecl) {
-        self.decls = decls
-        self.name = name
-        super.init(pos)
-    }
-
-    override func str() -> String {
-        return "InterfaceDecl(interface \(name) \(decls.str()))"
-    }
-
-    override func text() -> String {
-        return "interface \(name) \(decls.text())"
-    }
+class EnumDecl: CombinationDecl {
+    override var typeName: String = "enum"
 }
 
-class ImplDecl: Decl {
-    var name: String
-    var decls: BlockDecl
-
-    init(_ name: String, _ pos: Position, _ decls: BlockDecl) {
-        self.decls = decls
-        self.name = name
-        super.init(pos)
-    }
-
-    override func str() -> String {
-        return "ImplDecl(impl \(name) \(decls.str()))"
-    }
-
-    override func text() -> String {
-        return "impl \(name) \(decls.text())"
-    }
+class InterfaceDecl: CombinationDecl {
+    override var typeName: String = "interface"
 }
 
-// class ArgDecl: Decl {
-//     var nameDecls: Names
-
-//     override init() {
-//         self.nameDecls = Names()
-//         super.init()
-//     }
-
-//     init(_ nameDecls: Names, _ pos: Position) {
-//         self.nameDecls = nameDecls
-//         super.init(pos)
-//     }
-
-//     override func str() -> String {
-//         var str = "ArgDecl(("
-//         str += nameDecls.names.map { name in
-//             if name.isVar {
-//                 return name.str()
-//             }
-//             return name.str(false)
-//         }.joined(separator: ", ")
-//         str += "))"
-//         return str
-//     }
-
-//     override func text() -> String {
-//         var str = "("
-//         str += nameDecls.names.map { name in
-//             print(name, name.isVar)
-//             if name.isVar {
-//                 return name.str()
-//             }
-//             return name.str(false)
-//         }.joined(separator: ", ")
-//         str += ")"
-//         return str
-//     }
-// }
+class ImplDecl: CombinationDecl {
+    override var typeName: String = "impl"
+}
 
 class FnDecl: Decl {
     var name: String
-    var args: Names
-    var returns: Names
+    var args: TupleArgDecl
+    var returns: TupleArgDecl?
     var blockStmt: BlockStmt?
 
-    init(_ name: String, _ pos: Position, _ args: Names, _ returns: Names) {
+    init(_ name: String, _ pos: Position, _ args: TupleArgDecl) {
+        self.name = name
+        self.pos = pos
+        self.args = args
+        
+    }
+    init(_ name: String, _ pos: Position, _ args: TupleArgDecl, _ returns: TupleArgDecl) {
         self.name = name
         self.args = args
         self.returns = returns
@@ -336,25 +249,29 @@ class FnDecl: Decl {
         super.init(pos)
     }
 
-    convenience init(_ name: String, _ pos: Position, _ args: Names, _ returns: Names, _ blockStmt: BlockStmt) {
+    convenience init(_ name: String, _ pos: Position, _ args: TupleArgDecl, _ returns: TupleArgDecl, _ blockStmt: BlockStmt) {
         self.init(name, pos, args, returns)
         self.blockStmt = blockStmt
     }
 
     override func str() -> String {
         var str = "fn \(name)"
-        str += "\(args.str()) \(returns.str())"
+        str += "\(args.str())"
+        if let r = returns {
+            str += " \(r.str())"
+        }
         if let stmt = blockStmt {
             str += stmt.str()
         }
+        str = "\(node)(\(str))"
         return str
     }
 
     override func text() -> String {
         var str = "fn \(name)"
         str += "\(args.text())"
-        if returns.count != 0 {
-            str += " \(returns.text())"
+        if let r = returns {
+            str += " \(r.str())"
         }
         if let stmt = blockStmt {
             str += " \(stmt.text())"

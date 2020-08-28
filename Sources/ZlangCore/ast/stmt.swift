@@ -16,43 +16,30 @@ class BlockStmt: Stmt {
     }
 
     override func str() -> String {
-        var str = "BlockStmt({"
+        var str = stmts.map { stmt in "    " + stmt.str() }.joined(separator: "\n")
         if stmts.count != 0 {
-            str += "\n"
+            str  = "\n\(str)\n"
         }
-        str += stmts.map { stmt in
-            "    " + stmt.str()
-        }.joined(separator: "\n")
-        if stmts.count != 0 {
-            str += "\n"
-        }
-        str += "})"
+        str = "\(node)({\(str)})"
         return str
     }
 
     override func text() -> String {
-        var str = "{"
+        var str = stmts.map { stmt in "    " + stmt.text() }.joined(separator: "\n")
         if stmts.count != 0 {
-            str += "\n"
+            str  = "\n\(str)\n"
         }
-        str += stmts.map { stmt in
-            "    " + stmt.text()
-        }.joined(separator: "\n")
-        if stmts.count != 0 {
-            str += "\n"
-        }
-        str += "}"
+        str = "\(node)({\(str)})"
         return str
     }
 }
 
 class ExprStmt: Stmt {
-    var expr: Expr = Expr()
-    var isComment: Bool
-    init(expr: Expr, isComment: Bool) {
+    var expr: Expr
+
+    init(expr: Expr, _ pos: Position) {
         self.expr = expr
-        self.isComment = isComment
-        super.init()
+        super.init(pos)
     }
 }
 
@@ -87,17 +74,21 @@ class AssignStmt: Stmt {
 // }
 
 class GoStmt: Stmt {
-    var callExpr: Expr = Expr()
-
-    init(callExpr: Expr) {
+    init(callExpr: Expr, _ pos: Position) {
         self.callExpr = callExpr
-        super.init()
+        super.init(pos)
     }
 }
 
 class WithStmt: Stmt {
-    var stmt: AssignStmt = AssignStmt()
-    var block: BlockStmt = BlockStmt()
+    var stmt: AssignStmt
+    var block: BlockStmt
+
+    init(_ stmt: AssignStmt, _ block: BlockStmt, _ pos: Position) {
+        self.stmt = stmt
+        self.block = block
+        super.init(pos)
+    }
 }
 
 class SwitchStmt: Stmt {
@@ -128,6 +119,7 @@ class BranchStmt: Stmt {
         super.init()
     }
 }
+
 class ReturnStmt: Stmt {
     var expr: Expr = Expr()
 }

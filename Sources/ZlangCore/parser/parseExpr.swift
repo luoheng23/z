@@ -101,8 +101,7 @@ extension Parser {
 
     func dotExpr(_ left: Expr) -> SelectorExpr {
         check(.dot)
-        let fieldName = tok.lit
-        next()
+        let fieldName = check(.name)
         return SelectorExpr(left, fieldName, tok.pos)
     }
 
@@ -118,10 +117,6 @@ extension Parser {
     func nameExpr() -> Expr {
         let pos = tok.pos
         let name = checkName()
-        if tok.kind == .colon {
-            let typeExpr = expr()
-            return NameDeclareExpr(name, pos, typeExpr.type ?? Value(name))
-        }
         let expr = NameExpr(name: name, pos: pos)
         return expr
     }

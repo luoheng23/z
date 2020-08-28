@@ -76,11 +76,7 @@ class Parser {
 
     func check(_ expected: Kind) {
         if tok.kind != expected {
-            if tok.kind == .name {
-                error("unexpected name \(tok.lit), expecting \(expected.str())")
-            } else {
-                error("unexpected \(tok.kind.str()), expecting \(expected.str())")
-            }
+            error("unexpected \(tok.str()), expecting \(expected.str())")
         }
         next()
     }

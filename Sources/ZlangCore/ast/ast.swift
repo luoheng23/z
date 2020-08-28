@@ -1,43 +1,40 @@
 
 class Ast { 
-    var pos: Position 
-    var comments: [Comment]
+    var pos: Position
     var type: Value?
+
+    var node: String { String(describing: type(of: self)) }
 
     init() {
         self.pos = Position()
-        self.comments = []
         self.type = nil
     }
 
-    init(_ pos: Position, _ comments: [Comment], _ type: Value) {
+    init(_ pos: Position) {
         self.pos = pos
-        self.comments = comments
+        self.type = nil
+    }
+
+    init(_ pos: Position, _ type: Value) {
+        self.pos = pos
         self.type = type
-    }
-
-    init(_ pos: Position, _ comments: [Comment] = []) {
-        self.pos = pos
-        self.comments = comments
-        self.type = nil
     }
 
     init(_ other: Ast) {
         self.pos = other.pos
-        self.comments = other.comments
         self.type = other.type
     }
 
-    func addComment(_ comment: Comment) {
-        comments.append(comment)
+    func setType(_ type: Value) {
+        self.type = type
     }
 
-    func addComments(_ comments: [Comment]) {
-        self.comments += comments
+    func hasType() -> Bool {
+        return self.type != nil
     }
 
     func str() -> String {
-        return "Ast()"
+        return "\(node)()"
     }
 
     func text() -> String {
@@ -50,5 +47,3 @@ class Decl: Stmt {}
 class Stmt: Ast {}
 
 class Expr: Ast {}
-
-class ConstField {}
