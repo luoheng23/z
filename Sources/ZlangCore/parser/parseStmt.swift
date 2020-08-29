@@ -1,29 +1,31 @@
 extension Parser {
     func stmt(_ isTopLevel: Bool = false) -> Stmt {
+        var node: Stmt
         switch(tok.kind) {
         case .lcbr:
-            return blockStmt()
+            node = blockStmt()
         case .key_for:
-            return forStmt()
+            node = forStmt()
         case .key_const, .key_var, .key_func, .key_struct, .key_enum, .key_interface, .key_impl,
                 .key_type:
-            return decl()
+            node = decl()
         case .comment:
-            return commentStmt()
+            node = commentStmt()
         case .key_return:
-            return returnStmt()
+            node = returnStmt()
         case .key_continue, .key_break:
             let tok = self.tok
             next()
-            return BranchStmt(tok: tok)
+            node = BranchStmt(tok: tok)
         // case .key_defer:
         //     next()
         //     return DeferStmt(stmts: blockStmt(), )
         case .key_go:
-            return goStmt()
+            node = goStmt()
         default:
-            return exprStmt()
+            node = exprStmt()
         }
+        return node
     }
 
 

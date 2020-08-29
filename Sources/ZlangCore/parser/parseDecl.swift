@@ -1,24 +1,29 @@
 
 extension Parser {
     func decl() -> Decl {
+        var node: Decl
         switch (tok.kind) {
         case .key_var, .key_const:
-            return varOrConstDecl()
+            node =  varOrConstDecl()
         case .key_type:
-            return typeDecl()
+            node =  typeDecl()
         case .key_enum:
-            return enumDecl()
+            node =  enumDecl()
+        case .key_case:
+            node = enumValueDecl()
         case .key_struct:
-            return structDecl()
+            node =  structDecl()
         case .key_interface:
-            return interfaceDecl()
+            node =  interfaceDecl()
         case .key_impl:
-            return implDecl()
+            node =  implDecl()
         case .key_func:
-            return fnDecl()
+            node =  fnDecl()
         default:
-            fatalError("invalid decl: \(tok.kind)")
+            fatalError("invalid decl: \(tok.str())")
+            // node = Decl()
         }
+        return node
     }
 
     func basicNameDecl(_ annotationRequired: Bool = false) -> OneNameAnnotationDecl {
@@ -71,6 +76,14 @@ extension Parser {
         return ArgDecl(basicName, pos)
     }
 
+    func enumValueDecl() -> EnumValueDecl {
+        let pos = tok.pos
+        check(.key_case)
+        let name = nameExpr()
+        pos.addPosition(name.pos)
+        return EnumValueDecl(name, pos)
+    }
+
     func tupleArgDecl() -> TupleArgDecl {
         let pos = tok.pos
         check(.lpar)
@@ -90,14 +103,14 @@ extension Parser {
         }
         check(.lpar)
         let left = basicTupleExpr({() -> OneNameAnnotationDecl in basicNameDecl() })
+        pos.addPosition(tok.pos)
         check(.rpar)
         var right: TupleExpr? = nil
         if isTok(.assign) {
             check(.assign)
             right = tupleExpr()
+            pos.addPosition(right!.pos)
         }
-        pos.addPosition(tok.pos)
-        check(.rpar)
         if let r = right {
             return TupleNameDecl(left, pos, r, isVar)
         }

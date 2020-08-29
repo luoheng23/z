@@ -58,12 +58,22 @@ class Parser {
     }
 
 
-    func next() {
+    func next(_ skipWhitespace: Bool = true) {
         preTok = tok
         tok = peekTok
         peekTok = peekTok2
         peekTok2 = peekTok3
-        peekTok3 = scanner.scan()
+        peekTok3 = scanner.scan(skipWhitespace)
+    }
+
+    func endStmt() {
+        while !isTok(.nl) {
+            next(false)
+            if !isTok(.space) && !isTok(.nl) {
+                check(.nl)
+                return
+            }
+        }
     }
 
     func eatToEndOfLine() {

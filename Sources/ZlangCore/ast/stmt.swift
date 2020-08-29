@@ -29,7 +29,7 @@ class BlockStmt: Stmt {
         if stmts.count != 0 {
             str  = "\n\(str)\n"
         }
-        str = "\(node)({\(str)})"
+        str = "{\(str)}"
         return str
     }
 }
@@ -40,6 +40,14 @@ class ExprStmt: Stmt {
     init(_ expr: Expr, _ pos: Position) {
         self.expr = expr
         super.init(pos)
+    }
+
+    override func str() -> String {
+        return "\(node)(\(expr.str()))"
+    }
+
+    override func text() -> String {
+        return expr.text()
     }
 }
 

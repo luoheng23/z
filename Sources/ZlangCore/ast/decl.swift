@@ -204,17 +204,34 @@ class CombinationDecl: Decl {
     }
 
     override func str() -> String {
-        return "\(node)(\(typeName) \(name) \(decls.str()))"
+        return "\(node)(\(typeName) \(name.str()) \(decls.str()))"
     }
 
     override func text() -> String {
-        return "\(typeName) \(name) \(decls.text())"
+        return "\(typeName) \(name.text()) \(decls.text())"
     }
 
 }
 
 class StructDecl: CombinationDecl {
     override var typeName: String { get { "struct" } set {} }
+}
+
+class EnumValueDecl: Decl {
+    var name: NameExpr
+
+    init(_ name: NameExpr, _ pos: Position) {
+        self.name = name
+        super.init(pos)
+    }
+
+    override func str() -> String {
+        return "\(node)(case \(name.str()))"
+    }
+
+    override func text() -> String {
+        return "case \(name.text())"
+    }
 }
 
 class EnumDecl: CombinationDecl {
@@ -272,10 +289,10 @@ class FnDecl: Decl {
     }
 
     override func text() -> String {
-        var str = "fn \(name.str())"
+        var str = "fn \(name.text())"
         str += "\(args.text())"
         if let r = returns {
-            str += " \(r.str())"
+            str += " \(r.text())"
         }
         if let stmt = blockStmt {
             str += " \(stmt.text())"

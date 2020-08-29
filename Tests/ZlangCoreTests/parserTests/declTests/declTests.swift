@@ -47,34 +47,104 @@ final class DeclTests: BaseTests {
           enum name {}
           impl name {}
           fn name() {}
-           fn name() Int {}
+          fn name() (t Int) {}
       }
       """
     ]
     multiExprTests(str, StructDecl.self, "", .decl)
   }
 
-  func testFnDecl() {
-    let str = """
-      fn hello(var a: Int, b: Int) {
-          var hello: String = "50"
+  func testEnumDecl() {
+    let str = [
+      """
+      enum name {
+          case good
+          case hello
+          var s = 20
+          var s String
+          var (s, t) = (20, 30)
+          var (s Int, t String)
+          var (s Int, t) = (20, 30)
+          const s = 20
+          const s String
+          const (s, t) = (20, 30)
+          const (s Int, t String)
+          const (s Int, t) = (20, 30)
+          enum name {}
+          impl name {}
+          fn name() {}
+          fn name() (t Int) {}
       }
       """
-    let parser = Parser(str: str)
-    parser.readFirstToken()
-    // print(parser.stmt().str())
-    let first = parser.stmt() as! FnDecl
-    let answer = str
-    XCTAssert(first.text() == answer, "Failed to parse FnDecl: \(first.text()) != \(answer)")
+    ]
+    multiExprTests(str, EnumDecl.self, "", .decl)
+  }
+
+  func testImplDecl() {
+    let str = [
+      """
+      impl name {
+          var s = 20
+          var s String
+          var (s, t) = (20, 30)
+          var (s Int, t String)
+          var (s Int, t) = (20, 30)
+          const s = 20
+          const s String
+          const (s, t) = (20, 30)
+          const (s Int, t String)
+          const (s Int, t) = (20, 30)
+          enum name {}
+          impl name {}
+          fn name() {}
+          fn name() (t Int) {}
+      }
+      """
+    ]
+    multiExprTests(str, ImplDecl.self, "", .decl)
+  }
+
+  func testInterfaceDecl() {
+    let str = [
+      """
+      interface name {
+          var s = 20
+          var s String
+          var (s, t) = (20, 30)
+          var (s Int, t String)
+          var (s Int, t) = (20, 30)
+          const s = 20
+          const s String
+          const (s, t) = (20, 30)
+          const (s Int, t String)
+          const (s Int, t) = (20, 30)
+          enum name {}
+          impl name {}
+          fn name() {}
+          fn name() (t Int) {}
+      }
+      """
+    ]
+    multiExprTests(str, InterfaceDecl.self, "", .decl)
+  }
+
+  func testFnDecl() {
+    let str = """
+      fn hello(var a Int, b Int) {
+          var hello String = "50"
+          print(hello)
+      }
+      """
+      singleExprTest(str, FnDecl.self, "", .decl)
   }
 
   static var allTests = [
     ("testVarAndConstDecl", testVarAndConstDecl),
     ("testTypeDecl", testTypeDecl),
     ("testStructDecl", testStructDecl),
-    // ("testEnumDecl", testEnumDecl),
-    // ("testInterfaceDecl", testInterfaceDecl),
-    // ("testImplDecl", testImplDecl),
+    ("testEnumDecl", testEnumDecl),
+    ("testInterfaceDecl", testInterfaceDecl),
+    ("testImplDecl", testImplDecl),
     ("testFnDecl", testFnDecl),
   ]
 
