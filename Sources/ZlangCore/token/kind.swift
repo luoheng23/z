@@ -221,6 +221,10 @@ public enum Kind: String {
   }
 
   func str() -> String {
+    return "Kind \(text())"
+  }
+
+  func text() -> String {
     return self.rawValue
   }
 

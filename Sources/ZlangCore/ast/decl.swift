@@ -45,7 +45,7 @@ class OneNameAnnotationDecl: Decl {
         super.init(pos)
     }
     override func str() -> String {
-        var str = "\(node)(\(word)\(name)"
+        var str = "\(node)(\(word)\(name.str())"
         if let t = typeAnnotation {
             str += " \(t.str())"
         }
@@ -57,7 +57,7 @@ class OneNameAnnotationDecl: Decl {
     }
 
     override func text() -> String {
-        var str = "\(word)\(name)"
+        var str = "\(word)\(name.text())"
         if let t = typeAnnotation {
             str += " \(t.text())"
         }
@@ -97,19 +97,19 @@ class TupleArgDecl: Decl {
 }
 
 class TupleNameDecl: Decl {
-    var left: [NameDecl]
+    var left: [OneNameAnnotationDecl]
     var right: TupleExpr?
     var isVar: Bool
     var word: String { isVar ? "var" : "const" }
 
-    init(_ left: [NameDecl], _ pos: Position, _ isVar: Bool = false) {
+    init(_ left: [OneNameAnnotationDecl], _ pos: Position, _ isVar: Bool = false) {
         self.left = left
         self.isVar = isVar
         self.right = nil
         super.init(pos)
     }
 
-    init(_ left: [NameDecl], _ pos: Position, _ right: TupleExpr, _ isVar: Bool = false) {
+    init(_ left: [OneNameAnnotationDecl], _ pos: Position, _ right: TupleExpr, _ isVar: Bool = false) {
         self.left = left
         self.right = right
         self.isVar = isVar
@@ -118,7 +118,7 @@ class TupleNameDecl: Decl {
 
     override func str() -> String {
         var str = left.map { arg in arg.text() }.joined(separator: ", ")
-        str = "\(node)(\(word) \(str)"
+        str = "\(node)(\(word) (\(str))"
         if let r = right {
             str += " = \(r.str())"
         }
@@ -128,7 +128,7 @@ class TupleNameDecl: Decl {
 
     override func text() -> String {
         var str = left.map { arg in arg.text() }.joined(separator: ", ")
-        str = "\(word) \(str)"
+        str = "\(word) (\(str))"
         if let r = right {
             str += " = \(r.text())"
         }
@@ -153,7 +153,7 @@ class TypeDecl: Decl {
     }
 
     override func text() -> String {
-        return "type \(name.str())\(word) \(referenceType.text())"
+        return "type \(name.text())\(word) \(referenceType.text())"
     }
 }
 

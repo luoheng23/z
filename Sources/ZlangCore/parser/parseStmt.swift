@@ -5,7 +5,7 @@ extension Parser {
             return blockStmt()
         case .key_for:
             return forStmt()
-        case .key_const, .key_var, .key_func, .key_struct, .key_enum, .key_interface, .key_impl,    
+        case .key_const, .key_var, .key_func, .key_struct, .key_enum, .key_interface, .key_impl,
                 .key_type:
             return decl()
         case .comment:
@@ -22,10 +22,17 @@ extension Parser {
         case .key_go:
             return goStmt()
         default:
-            return Stmt()
+            return exprStmt()
         }
     }
 
+
+    func exprStmt() -> Stmt {
+        let pos = tok.pos
+        let expr = self.expr()
+        pos.addPosition(expr.pos)
+        return ExprStmt(expr, pos)
+    }
 
     func blockStmt() -> BlockStmt {
         return parseBlockNoScope()

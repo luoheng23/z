@@ -3,26 +3,18 @@ extension Parser {
     func expr(_ precedence: Int = 0) -> Expr {
         var node: Expr
         switch(tok.kind) {
-        case .key_true, .key_false:
-            node = BoolLiteral(val: tok, tok.pos)
-            next()
-        case .key_nil:
-            node = NoneLiteral(val: tok, tok.pos)
+        case .key_true, .key_false, .key_nil, .number, .string:
+            node = literal()
         case .dot:
             node = enumValueExpr()
         case .lpar:
             node = tupleExpr()
-        case .string:
-            node = stringExpr()
         case .name:
             node = nameExpr()
-        case .key_func:
-            node = funcExpr()
-        case .number:
-            node = numberExpr()
         case .minus, .plus, .amp, .mul, .key_not, .bit_not:
             node = prefixExpr()
         default:
+            error("Invalid expression token '\(tok.text())'")
             return Expr()
         }
         // Infix
@@ -32,8 +24,10 @@ extension Parser {
                 node = dotExpr(node)
             case .lsbr:
                 node = indexExpr(node)
-            case .lcbr:
+            case .lpar:
                 node = callExpr(node)
+            case .question:
+                node = ifElseExpr(node)
             default:
                 if tok.isInfix() {
                     node = infixExpr(node)
@@ -46,41 +40,26 @@ extension Parser {
         return node
     }
 
-    func stringExpr() -> StringLiteral {
-        let node = StringLiteral(val: tok, tok.pos)
-        check(.unknown, true)
-        return node
-    }
-
-    func numberExpr() -> Literal {
-        var node: Literal
-        if tok.lit.contains(where: [".", "e", "E", "p", "P"].contains) {
-            node = FloatLiteral(val: tok, tok.pos)
-        } else {
-            node = IntegerLiteral(val: tok, tok.pos)
-        }
-        check(.unknown, true)
-        return node
-    }
-
     func enumValueExpr() -> EnumValueExpr {
         check(.dot)
-        return EnumValueExpr(val: nameExpr(), tok.pos)
+        let node = EnumValueExpr(val: nameExpr(), tok.pos)
+        return node
     }
     
     func tupleExpr() -> TupleExpr {
         let pos = tok.pos
         check(.lpar)
-        let n = exprList()
+        let n = basicTupleExpr({ () -> Expr in expr() })
         pos.addPosition(tok.pos)
         check(.rpar)
-        return TupleExpr(n, pos)
+        let node = TupleExpr(n, pos)
+        return node
     }
 
     func prefixExpr() -> PrefixExpr {
         let pos = tok.pos
         let op = tok.kind
-        next()
+        check(.unknown, true)
         let right = expr(Precedence.pref.rawValue)
         return PrefixExpr(op: op, right: right, pos)
     }
@@ -107,9 +86,10 @@ extension Parser {
                 break
             }
             res.append(exprFunc())
-            if tok.kind != .comma {
+            if !isTok(.comma) {
                 break
             }
+            check(.comma)
         }
         return res
     }
@@ -130,27 +110,20 @@ extension Parser {
         return expr
     }
 
-    func funcExpr() -> Expr {
-        let pos = tok.pos
-        return Expr(pos)
-    }
-
     func callExpr(_ left: Expr) -> Expr {
-        return Expr()
+        let pos = left.pos
+        let args = tupleExpr()
+        pos.addPosition(args.pos)
+        return CallExpr(left, args, pos)
     }
 
-    func exprList() -> [Expr] {
-        var exprs: [Expr] = []
-        while (true) {
-            if tok.kind == .rpar || tok.kind == .eof {
-                break
-            }
-            exprs.append(expr())
-            if tok.kind != .comma {
-                break
-            }
-            next()
-        }
-        return exprs
+    func ifElseExpr(_ left: Expr) -> IfElseExpr {
+        let pos = left.pos
+        check(.question)
+        let truePart = expr()
+        check(.colon)
+        let falsePart = expr()
+        pos.addPosition(falsePart.pos)
+        return IfElseExpr(left, truePart, falsePart, pos)
     }
 }

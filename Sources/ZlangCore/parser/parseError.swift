@@ -11,12 +11,12 @@ extension Parser {
     }
 
     func errorWithPos(_ str: String, _ pos: Position) {
-        eatToEndOfLine()
         let error = Error(message: str,
             details: scanner.getLineInfo(pos),
             filePath: filePath,
             pos: pos)
         errors.append(error)
+        eatToEndOfLine()
         if errors.count > Parser.limitedErrors {
             for error in errors {
                 error.printError()

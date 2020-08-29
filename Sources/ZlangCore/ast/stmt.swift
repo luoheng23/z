@@ -37,7 +37,7 @@ class BlockStmt: Stmt {
 class ExprStmt: Stmt {
     var expr: Expr
 
-    init(expr: Expr, _ pos: Position) {
+    init(_ expr: Expr, _ pos: Position) {
         self.expr = expr
         super.init(pos)
     }

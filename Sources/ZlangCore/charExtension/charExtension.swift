@@ -4,7 +4,9 @@ extension Character {
   static let binDigit: Set<Character> = ["0", "1"]
   static let octDigit: Set<Character> = binDigit.union(["2", "3", "4", "5", "6", "7"])
   static let decDigit: Set<Character> = octDigit.union(["8", "9"])
-  static let hexDigit: Set<Character> = decDigit.union(["A", "B", "C", "D", "E", "F", "a", "b", "c", "d", "e", "f"])
+  static let hexDigit: Set<Character> = decDigit.union([
+    "A", "B", "C", "D", "E", "F", "a", "b", "c", "d", "e", "f",
+  ])
 
   static let prefixHex = "0x"
   static let prefixOct = "0o"
@@ -26,6 +28,10 @@ extension Character {
 
   func isOperator() -> Bool {
     return Kind.Operators.contains(Kind.getKind(self))
+  }
+
+  func isEof() -> Bool {
+    return .eof == Kind.getKind(self)
   }
 
   func isComment() -> Bool {
@@ -57,7 +63,7 @@ extension Character {
   }
 
   func isDigit(_ prefixStr: String = "") -> Bool {
-    switch (prefixStr) {
+    switch prefixStr {
     case Character.prefixBin:
       return isBinDigit()
     case Character.prefixHex:

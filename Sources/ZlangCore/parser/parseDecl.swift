@@ -1,5 +1,25 @@
 
 extension Parser {
+    func decl() -> Decl {
+        switch (tok.kind) {
+        case .key_var, .key_const:
+            return varOrConstDecl()
+        case .key_type:
+            return typeDecl()
+        case .key_enum:
+            return enumDecl()
+        case .key_struct:
+            return structDecl()
+        case .key_interface:
+            return interfaceDecl()
+        case .key_impl:
+            return implDecl()
+        case .key_func:
+            return fnDecl()
+        default:
+            fatalError("invalid decl: \(tok.kind)")
+        }
+    }
 
     func basicNameDecl(_ annotationRequired: Bool = false) -> OneNameAnnotationDecl {
         let pos = tok.pos
@@ -69,9 +89,11 @@ extension Parser {
             check(.key_const)
         }
         check(.lpar)
-        let left = basicTupleExpr(nameDecl)
+        let left = basicTupleExpr({() -> OneNameAnnotationDecl in basicNameDecl() })
+        check(.rpar)
         var right: TupleExpr? = nil
         if isTok(.assign) {
+            check(.assign)
             right = tupleExpr()
         }
         pos.addPosition(tok.pos)
@@ -87,28 +109,6 @@ extension Parser {
             return tupleNameDecl()
         }
         return nameDecl()
-    }
-
-    func decl() -> Decl {
-        switch (tok.kind) {
-        case .key_var, .key_const:
-            return varOrConstDecl()
-        case .key_type:
-            return typeDecl()
-        case .key_enum:
-            return enumDecl()
-        case .key_struct:
-            return structDecl()
-        case .key_interface:
-            return interfaceDecl()
-        case .key_impl:
-            return implDecl()
-        case .key_func:
-            return fnDecl()
-        default:
-            fatalError("invalid decl: \(tok.kind)")
-        }
-
     }
 
     func typeDecl() -> TypeDecl {

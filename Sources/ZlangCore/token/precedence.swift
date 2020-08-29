@@ -1,6 +1,7 @@
 
 public enum Precedence: Int {
     case lowest = 0
+    case question
     case cond_or // or
     case cond_and // and
     case in_is
@@ -14,6 +15,8 @@ public enum Precedence: Int {
 
     public static let prec: [Kind: Precedence] = [
         .lsbr: .index,
+        .lpar: .index,
+        .question: .question,
         .dot: .call,
         .mul: .product,
         .div: .product,

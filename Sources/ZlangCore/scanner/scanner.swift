@@ -26,6 +26,13 @@ class Scanner {
   var lineNr: Int = 0  // number of newline
   var columnNum: Int = 0 // current column
   var lastNewLinePos: SIndex  // last pos of newline
+  var nextNewLinePos: SIndex {
+    var p = pos
+    while p != text.endIndex && !text[p].isNewLine() && !text[p].isEof() {
+      p = text.index(after: p)
+    }
+    return p
+  }
 
   let slash: Character = "\\"
 
@@ -91,6 +98,7 @@ class Scanner {
     }
     return text[p]
   }
+
   func index(pos: SIndex, after: Int) -> SIndex {
     if let res = text.index(pos, offsetBy: after, limitedBy: endIndex) {
       return res
@@ -284,7 +292,7 @@ class Scanner {
   }
 
   func getLineInfo(_ pos: Position) -> String {
-    return String(text[pos.lineBegin..<lastNewLinePos])
+    return String(text[lastNewLinePos..<nextNewLinePos])
   }
 
   func scan(_ skipWhitespace: Bool = true) -> Token {
@@ -391,7 +399,7 @@ class Scanner {
 
 
   func error(_ str: String) {
-    fatalError(str)
+    print(str)
   }
 
   func expect(want: String, startPos: SIndex) -> Bool {

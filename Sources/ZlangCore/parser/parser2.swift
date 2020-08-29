@@ -76,7 +76,7 @@ class Parser {
     @discardableResult
     func check(_ expected: Kind, _ skip: Bool = false) -> Token {
         if !skip && !isTok(expected) {
-            error("unexpected \(tok.str()), expecting \(expected.str())")
+            error("unexpected token '\(tok.text())', expecting '\(expected.text())'")
             return Token()
         }
         next()

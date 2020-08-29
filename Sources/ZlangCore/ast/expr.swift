@@ -17,47 +17,6 @@ class NameExpr: Expr {
     }
 }
 
-class AtomExpr: Expr {
-    var left: Expr
-    var field: Expr
-
-    init(_ left: Expr, _ field: Expr, _ pos: Position) {
-        self.left = left
-        self.field = field
-        super.init(pos)
-    }
-}
-
-class DotExpr: AtomExpr {
-    override func str() -> String {
-        return "\(node)(\(left.str()).\(field))"
-    }
-
-    override func text() -> String {
-        return "\(left.text()).\(field)"
-    }
-}
-
-class IndexExpr: AtomExpr {
-    override func str() -> String {
-        return "\(node)(\(left.str())[\(field.str())])"
-    }
-
-    override func text() -> String {
-        return "\(left.text())[\(field.text())]"
-    }
-}
-
-class CallExpr: AtomExpr {
-    override func str() -> String {
-        return "\(node)(\(left.str())\(field.str()))"
-    }
-
-    override func text() -> String {
-        return "\(left.text())\(field.text())"
-    }
-}
-
 class EnumValueExpr: Expr {
     var val: NameExpr
 
@@ -67,11 +26,11 @@ class EnumValueExpr: Expr {
     }
 
     override func str() -> String {
-        return "\(node)(text())"
+        return "\(node)(\(text()))"
     }
 
     override func text() -> String {
-        return ".\(val.str())"
+        return ".\(val.text())"
     }
 }
 
@@ -101,6 +60,47 @@ class TupleExpr: Expr {
     }
 }
 
+class AtomExpr: Expr {
+    var left: Expr
+    var field: Expr
+
+    init(_ left: Expr, _ field: Expr, _ pos: Position) {
+        self.left = left
+        self.field = field
+        super.init(pos)
+    }
+}
+
+class DotExpr: AtomExpr {
+    override func str() -> String {
+        return "\(node)(\(left.str()).\(field.str()))"
+    }
+
+    override func text() -> String {
+        return "\(left.text()).\(field.text())"
+    }
+}
+
+class IndexExpr: AtomExpr {
+    override func str() -> String {
+        return "\(node)(\(left.str())[\(field.str())])"
+    }
+
+    override func text() -> String {
+        return "\(left.text())[\(field.text())]"
+    }
+}
+
+class CallExpr: AtomExpr {
+    override func str() -> String {
+        return "\(node)(\(left.str())\(field.str()))"
+    }
+
+    override func text() -> String {
+        return "\(left.text())\(field.text())"
+    }
+}
+
 class PrefixExpr: Expr {
     var op: Kind
     var right: Expr
@@ -116,7 +116,7 @@ class PrefixExpr: Expr {
     }
 
     override func text() -> String {
-        return "\(op.str())\(right.text())"
+        return "\(op.text())\(right.text())"
     }
 }
 
@@ -133,11 +133,11 @@ class InfixExpr: Expr {
     }
 
     override func str() -> String {
-        return "\(node)(\(left.str())\(op.str())\(right.str()))"
+        return "\(node)(\(left.str()) \(op.str()) \(right.str()))"
     }
 
     override func text() -> String {
-        return "\(left.text())\(op.str())\(right.text())"
+        return "\(left.text()) \(op.text()) \(right.text())"
     }
 }
 
