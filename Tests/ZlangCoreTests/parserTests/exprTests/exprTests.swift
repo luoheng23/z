@@ -86,7 +86,7 @@ final class ExprTests: BaseTests {
 
   func testIfElseExpr() {
     let str = [
-      "hello ? good : not",
+      "hello ? good : right",
       ".hello ? yes.g : ok",
     ]
     multiExprTests(str, IfElseExpr.self)
@@ -102,6 +102,16 @@ final class ExprTests: BaseTests {
     multiExprTests(str, CallExpr.self)
   }
 
+  func testIsInAsExpr() {
+    let str = [
+      "hello in world",
+      "hello is world",
+      "hello and world",
+      "hello or world",
+    ]
+    multiExprTests(str, InfixExpr.self)
+  }
+
   static var allTests = [
     ("testNameExpr", testNameExpr),
     ("testEnumVal", testEnumVal),
@@ -112,5 +122,6 @@ final class ExprTests: BaseTests {
     ("testInfixExpr", testInfixExpr),
     ("testIfElseExpr", testIfElseExpr),
     ("testCallExpr", testCallExpr),
+    ("testIsInAsExpr", testIsInAsExpr),
   ]
 }

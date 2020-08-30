@@ -95,6 +95,7 @@ public enum Kind: String {
   case key_true = "true"
   case key_type = "type"
   case key_var = "var"
+  case key_with = "with"
 
   init?() {
     self.init(rawValue: "unknown")
@@ -143,6 +144,7 @@ public enum Kind: String {
     .key_true,
     .key_type,
     .key_var,
+    .key_with,
   ]
 
   static let KEYWORDS = buildKeys()
@@ -225,6 +227,9 @@ public enum Kind: String {
   }
 
   func text() -> String {
+    if self.rawValue == "not" {
+      return "not "
+    }
     return self.rawValue
   }
 

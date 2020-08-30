@@ -4,20 +4,21 @@ public enum Precedence: Int {
     case question
     case cond_or // or
     case cond_and // and
-    case in_is
     case assign // =
     case eq // == !=
+    case range
     case sum // + - | ^
     case product // * / << >> & %
     case pref // -X not X
-    case call // func(X) foo.method(x)
     case index // array[index]
 
     public static let prec: [Kind: Precedence] = [
         .lsbr: .index,
         .lpar: .index,
+        .range: .range,
+        .halfRange: .range,
         .question: .question,
-        .dot: .call,
+        .dot: .index,
         .mul: .product,
         .div: .product,
         .mod: .product,
@@ -48,8 +49,8 @@ public enum Precedence: Int {
         .mult_assign: .assign,
         .xor_assign: .assign,
 
-        .key_in: .in_is,
-        .key_is: .in_is,
+        .key_in: .index,
+        .key_is: .index,
 
         .key_and: .cond_and,
         .key_or: .cond_or,
