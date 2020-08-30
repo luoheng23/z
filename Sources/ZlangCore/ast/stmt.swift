@@ -33,6 +33,15 @@ class ForStmt: Stmt {
         str += block.text()
         return str
     }
+
+    override func gen() -> String {
+        var str = "for "
+        if let c = cond {
+            str += "\(c.gen()) "
+        }
+        str += block.gen()
+        return str
+    }
 }
 
 class AssignStmt: Stmt {
@@ -54,6 +63,10 @@ class AssignStmt: Stmt {
 
     override func text() -> String {
         return "\(left.text()) \(op.text()) \(right.text())"
+    }
+
+    override func gen() -> String {
+        return "\(left.gen()) \(op.gen()) \(right.gen())"
     }
 
 
@@ -86,6 +99,17 @@ class SwitchStmt: Stmt {
         }
         var str = "switch \(cond.text()) {\n"
         str += branches.map { branch in branch.text()}.joined(separator: "\n")
+        str += "\n}"
+        str = "\(str)"
+        return str
+    }
+
+    override func gen() -> String {
+        if branches.count == 0 {
+            return "switch \(cond.gen()) {}"
+        }
+        var str = "switch \(cond.gen()) {\n"
+        str += branches.map { branch in branch.gen()}.joined(separator: "\n")
         str += "\n}"
         str = "\(str)"
         return str
@@ -128,6 +152,18 @@ class SwitchBranch: Stmt {
             str = "default "
         }
         str += block.text()
+        str = "\(str)"
+        return str
+    }
+
+    override func gen() -> String {
+        var str: String = ""
+        if let c = cond {
+            str = "case \(c.gen()) "
+        } else {
+            str = "default "
+        }
+        str += block.gen()
         str = "\(str)"
         return str
     }
@@ -180,6 +216,18 @@ class IfStmt: Stmt {
         str += trueBlock.text()
         if let f = falseBlock {
             str += " else \(f.text())"
+        }
+        return str
+    }
+
+    override func gen() -> String {
+        var str: String = ""
+        if let c = cond {
+            str = "if \(c.gen()) "
+        }
+        str += trueBlock.gen()
+        if let f = falseBlock {
+            str += " else \(f.gen())"
         }
         return str
     }
@@ -269,6 +317,10 @@ class GoDeferReturnStmt: Stmt {
     override func text() -> String {
         return "\(stmtName) \(expr.text())"
     }
+
+    override func gen() -> String {
+        return "\(stmtName) \(expr.gen())"
+    }
 }
 
 class GoStmt: GoDeferReturnStmt {
@@ -298,6 +350,12 @@ class CommentStmt: Stmt {
 
     override func text() -> String {
         return comment.joined(separator: "\n")
+    }
+
+    override func gen() -> String {
+        return comment.map { cmt in
+            return "// " + cmt[cmt.index(after: cmt.startIndex)...]
+        }.joined(separator: "\n")
     }
 }
 
@@ -334,6 +392,15 @@ class BlockStmt: Stmt {
         str = "{\(str)}"
         return str
     }
+
+    override func gen() -> String {
+        var str = stmts.map { stmt in "    " + stmt.gen() }.joined(separator: "\n")
+        if stmts.count != 0 {
+            str  = "\n\(str)\n"
+        }
+        str = "{\(str)}"
+        return str
+    }
 }
 
 class ExprStmt: Stmt {
@@ -351,4 +418,10 @@ class ExprStmt: Stmt {
     override func text() -> String {
         return expr.text()
     }
+
+    override func gen() -> String {
+        return expr.gen()
+    }
+
+
 }

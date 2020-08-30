@@ -1,5 +1,3 @@
-
-
 typealias int = Int
 typealias int8 = Int8
 typealias int16 = Int16
@@ -16,18 +14,3 @@ typealias char = Character
 typealias string = String
 typealias list = Array
 typealias dict = Dictionary
-
-let keyword = [
-    "impl": "extension",
-    "interface": "protocol",
-    "fn": "func",
-]
-
-extension String {
-    func getSwiftKeyword() -> String {
-        if let word = keyword[self] {
-            return word
-        }
-        return self
-    }
-}

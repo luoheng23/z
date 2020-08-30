@@ -270,4 +270,7 @@ public enum Kind: String {
     return !isKind(kind)
   }
 
+  func gen() -> String {
+    return text()
+  }
 }

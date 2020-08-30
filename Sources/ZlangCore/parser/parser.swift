@@ -5,6 +5,7 @@ public class Parser {
   static var limitedErrors = 1
   static var limitedWarnings = 1
 
+  static let builtinType = "Sources/ZlangCore/code-generator/typealias.swift"
   public var originPath: String
   public var filePath: String
 
@@ -106,10 +107,11 @@ public class Parser {
 
   public func parseToFile() {
     let module = stmts()
-
-    if let file = try? File(path: filePath) {
+    if let file = try? File(path: filePath),
+      let typ = try? (try? File(path: Parser.builtinType))?.read() {
       _ = try? file.write("")
-      _ = try? file.write(module.gen())
+      _ = try? file.append(String(decoding: typ, as: UTF8.self))
+      _ = try? file.append(module.gen())
     }
   }
 }

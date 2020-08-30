@@ -70,6 +70,17 @@ class OneNameAnnotationDecl: Decl {
     }
     return str
   }
+
+  override func gen() -> String {
+    var str = "\(word.getSwiftKeyword()) \(name.gen())"
+    if let t = typeAnnotation {
+      str += ": \(t.gen())"
+    }
+    if let t = defaultValue {
+      str += " = \(t.gen())"
+    }
+    return str
+  }
 }
 
 class NameDecl: OneNameAnnotationDecl {
@@ -84,6 +95,32 @@ class ArgDecl: OneNameAnnotationDecl {
     get { isVar ? "var " : "" }
     set {}
   }
+
+  override func gen() -> String {
+    var str = "_ \(name.gen()): "
+    if isVar {
+      str += "inout "
+    }
+    if let t = typeAnnotation {
+      str += "\(t.gen())"
+    }
+    if let t = defaultValue {
+      str += " = \(t.gen())"
+    }
+    return str
+  }
+
+  func genReturn(_ isOnlyOne: Bool = false) -> String {
+    if isOnlyOne {
+      return "\(typeAnnotation!.gen())"
+    }
+    var str = "\(name.gen()): "
+    if let t = typeAnnotation {
+      str += "\(t.gen())"
+    }
+    return str
+  }
+
 }
 
 class TupleArgDecl: Decl {
@@ -101,6 +138,22 @@ class TupleArgDecl: Decl {
 
   override func text() -> String {
     let str = args.map { arg in arg.text() }.joined(separator: ", ")
+    return "(\(str))"
+  }
+
+  override func gen() -> String {
+    let str = args.map { arg in arg.gen() }.joined(separator: ", ")
+    return "(\(str))"
+  }
+
+  func genReturn() -> String {
+    if args.count == 0 {
+      return ""
+    }
+    if args.count == 1 {
+      return args[0].genReturn(true)
+    }
+    let str = args.map { arg in arg.genReturn() }.joined(separator: ", ")
     return "(\(str))"
   }
 
@@ -145,6 +198,15 @@ class TupleNameDecl: Decl {
     }
     return str
   }
+
+  override func gen() -> String {
+    var str = left.map { arg in arg.gen() }.joined(separator: ", ")
+    str = "\(word.getSwiftKeyword()) (\(str))"
+    if let r = right {
+      str += " = \(r.gen())"
+    }
+    return str
+  }
 }
 
 class TypeDecl: Decl {
@@ -165,6 +227,11 @@ class TypeDecl: Decl {
 
   override func text() -> String {
     return "type \(name.text())\(word) \(referenceType.text())"
+  }
+
+  override func gen() -> String {
+    let typ = "type".getSwiftKeyword()
+    return "\(typ) \(name.gen()) = \(referenceType.gen())"
   }
 }
 
@@ -195,6 +262,19 @@ class BlockDecl: Decl {
       str += "\n"
     }
     str += decls.map { decl in "    " + decl.text() }.joined(separator: "\n")
+    if decls.count != 0 {
+      str += "\n"
+    }
+    str += "}"
+    return str
+  }
+
+  override func gen() -> String {
+    var str = "{"
+    if decls.count != 0 {
+      str += "\n"
+    }
+    str += decls.map { decl in "    " + decl.gen() }.joined(separator: "\n")
     if decls.count != 0 {
       str += "\n"
     }
@@ -249,6 +329,10 @@ class EnumValueDecl: Decl {
 
   override func text() -> String {
     return "case \(name.text())"
+  }
+
+  override func gen() -> String {
+    return "case \(name.gen())"
   }
 }
 
@@ -327,6 +411,19 @@ class FnDecl: Decl {
     }
     if let stmt = blockStmt {
       str += " \(stmt.text())"
+    }
+    return str
+  }
+
+  override func gen() -> String {
+    let fn = "fn".getSwiftKeyword()
+    var str = "\(fn) \(name.gen())"
+    str += "\(args.gen())"
+    if let r = returns {
+      str += " -> \(r.genReturn())"
+    }
+    if let stmt = blockStmt {
+      str += " \(stmt.gen())"
     }
     return str
   }
