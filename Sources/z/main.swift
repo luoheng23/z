@@ -7,7 +7,7 @@ func main() {
         print("USAGE: ./z target.z")
         return
     }
-    let parse = parser(CommandLine.arguments[1])
+    let parse = Parser(CommandLine.arguments[1])
     parse.parseToFile()
     let task = Process()
     task.executableURL = URL(fileURLWithPath: "/usr/bin/env")

@@ -391,10 +391,10 @@ class Scanner {
         let str = scanString()
         return constructToken(.string, str, str.count)
       default:
-        return constructToken(.unknown, Kind.unknown.rawValue)
+        return constructToken(.eof, Kind.eof.rawValue)
       }
     }
-    return constructToken(.unknown, Kind.unknown.rawValue)
+    return constructToken(.eof, Kind.eof.rawValue)
   }
 
 

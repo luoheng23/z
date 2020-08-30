@@ -206,4 +206,12 @@ extension Parser {
     check(.rcbr)
     return SwitchStmt(cond, branches, pos)
   }
+
+  func stmts() -> Module {
+    var stmts: [Stmt] = []
+    while !isTok(.eof) {
+      stmts.append(stmt())
+    }
+    return Module(stmts)
+  }
 }

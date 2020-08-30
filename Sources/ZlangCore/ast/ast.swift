@@ -40,6 +40,10 @@ class Ast {
     func text() -> String {
         return ""
     }
+
+    func gen() -> String {
+        return text()
+    }
 }
 
 class Decl: Stmt {}

@@ -1,12 +1,11 @@
 
-let a = 20
+const a = 20
 var b = 30
 print(a + b)
-
-@discardableResult
-func hello(word: Int, big: Int) -> Int {
+fn hello(word int, big int)
+int
+{
     print("Hello world")
     return word + big
 }
-
-hello(word: 3, big: 4)
+hello(3, 4)
