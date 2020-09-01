@@ -18,8 +18,8 @@ typealias dict = Dictionary
 let a = 20
 var  b = 30
 print(a + b)
-func hello(_ word: int, _ big: int) -> int {
+func hello(_ word: int = 20, _ big: int = 30) -> int {
     print("Hello world")
     return word + big
 }
-print(hello(3, 4))
+print(hello(3, 4), hello())

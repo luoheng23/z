@@ -91,12 +91,19 @@ class NameDecl: OneNameAnnotationDecl {
 }
 
 class ArgDecl: OneNameAnnotationDecl {
+  var isReturn: Bool = false
   override var word: String {
     get { isVar ? "var " : "" }
     set {}
   }
 
   override func gen() -> String {
+    if isReturn {
+      if let t = typeAnnotation {
+        return t.gen()
+      }
+      return name.gen()
+    }
     var str = "_ \(name.gen()): "
     if isVar {
       str += "inout "
@@ -109,18 +116,6 @@ class ArgDecl: OneNameAnnotationDecl {
     }
     return str
   }
-
-  func genReturn(_ isOnlyOne: Bool = false) -> String {
-    if isOnlyOne {
-      return "\(typeAnnotation!.gen())"
-    }
-    var str = "\(name.gen()): "
-    if let t = typeAnnotation {
-      str += "\(t.gen())"
-    }
-    return str
-  }
-
 }
 
 class TupleArgDecl: Decl {
@@ -145,18 +140,6 @@ class TupleArgDecl: Decl {
     let str = args.map { arg in arg.gen() }.joined(separator: ", ")
     return "(\(str))"
   }
-
-  func genReturn() -> String {
-    if args.count == 0 {
-      return ""
-    }
-    if args.count == 1 {
-      return args[0].genReturn(true)
-    }
-    let str = args.map { arg in arg.genReturn() }.joined(separator: ", ")
-    return "(\(str))"
-  }
-
 }
 
 class TupleNameDecl: Decl {
@@ -360,7 +343,7 @@ class ImplDecl: CombinationDecl {
 class FnDecl: Decl {
   var name: NameExpr
   var args: TupleArgDecl
-  var returns: TupleArgDecl?
+  var returns: Decl?
   var blockStmt: BlockStmt?
 
   init(_ name: NameExpr, _ pos: Position, _ args: TupleArgDecl) {
@@ -371,7 +354,7 @@ class FnDecl: Decl {
     super.init(pos)
   }
 
-  convenience init(_ name: NameExpr, _ pos: Position, _ args: TupleArgDecl, _ returns: TupleArgDecl)
+  convenience init(_ name: NameExpr, _ pos: Position, _ args: TupleArgDecl, _ returns: Decl)
   {
     self.init(name, pos, args)
     self.returns = returns
@@ -383,7 +366,7 @@ class FnDecl: Decl {
   }
 
   convenience init(
-    _ name: NameExpr, _ pos: Position, _ args: TupleArgDecl, _ returns: TupleArgDecl,
+    _ name: NameExpr, _ pos: Position, _ args: TupleArgDecl, _ returns: Decl,
     _ blockStmt: BlockStmt
   ) {
     self.init(name, pos, args, returns)
@@ -420,7 +403,7 @@ class FnDecl: Decl {
     var str = "\(fn) \(name.gen())"
     str += "\(args.gen())"
     if let r = returns {
-      str += " -> \(r.genReturn())"
+      str += " -> \(r.gen())"
     }
     if let stmt = blockStmt {
       str += " \(stmt.gen())"

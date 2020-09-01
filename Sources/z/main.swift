@@ -7,14 +7,20 @@ func main() {
         print("USAGE: ./z target.z")
         return
     }
-    let parse = Parser(CommandLine.arguments[1])
-    parse.parseToFile()
     let task = Process()
+    var parse: Parser
+    if CommandLine.arguments.count >= 3 {
+       parse = Parser(CommandLine.arguments[2])
+       task.arguments = ["swiftc", parse.filePath]
+    } else {
+        parse = Parser(CommandLine.arguments[1])
+        task.arguments = ["swift", parse.filePath]
+    }
+    parse.parseToFile()
     task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
     task.standardOutput = FileHandle.standardOutput
     task.standardInput = FileHandle.standardInput
     task.standardError = FileHandle.standardError
-    task.arguments = ["swift", parse.filePath]
     do {
         try task.run()
     } catch let err {

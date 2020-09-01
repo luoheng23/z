@@ -64,16 +64,20 @@ extension Parser {
         return NameDecl(basicName, pos)
     }
 
-    func argDecl() -> ArgDecl {
+    func argDecl(_ isReturn: Bool = false) -> ArgDecl {
         let pos = tok.pos
         let isVar = isTok(.key_var)
         if isVar {
             check(.key_var)
         }
-        let basicName = basicNameDecl(true)
+        let basicName = basicNameDecl(!isReturn)
         basicName.isVar = isVar
         pos.addPosition(basicName.pos)
-        return ArgDecl(basicName, pos)
+        let decl = ArgDecl(basicName, pos)
+        if isReturn {
+            decl.isReturn = true
+        }
+        return decl
     }
 
     func enumValueDecl() -> EnumValueDecl {
@@ -84,13 +88,14 @@ extension Parser {
         return EnumValueDecl(name, pos)
     }
 
-    func tupleArgDecl() -> TupleArgDecl {
+    func tupleArgDecl(_ isReturn: Bool = false) -> TupleArgDecl {
         let pos = tok.pos
         check(.lpar)
-        let args = basicTupleExpr(argDecl)
+        let args = basicTupleExpr({() -> ArgDecl in argDecl(isReturn) })
         pos.addPosition(tok.pos)
         check(.rpar)
-        return TupleArgDecl(args, pos)
+        let tupleArgs = TupleArgDecl(args, pos)
+        return tupleArgs
     }
 
     func tupleNameDecl() -> TupleNameDecl {
@@ -142,9 +147,13 @@ extension Parser {
         check(.key_func)
         let name = nameExpr()
         let args = tupleArgDecl()
-        var returns: TupleArgDecl?
-        if isTok(.lpar) {
-            returns = tupleArgDecl()
+        var returns: Decl?
+        if !isTok(.lcbr) {
+            if isTok(.lpar) {
+                returns = tupleArgDecl(true)
+            } else {
+                returns = argDecl(true)
+            }
             pos.addPosition(returns!.pos)
         }
         var blockStmt: BlockStmt?
