@@ -25,10 +25,6 @@ public class Parser {
   var errors: [Error] = []
   var warnings: [Warning] = []
 
-  var comments: CommentStmt? = nil
-
-  var fnName: String = ""
-
   public init(_ filePath: String) {
     self.originPath = filePath
     self.filePath = String(filePath.split(separator: ".")[0] + ".swift")

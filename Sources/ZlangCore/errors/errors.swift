@@ -1,9 +1,19 @@
 
 import ConsoleColor
 
+enum Warnings {
+    case unusedVariable
+    case unchangedVariable
+}
+
 enum Errors {
     case invalidTypeAnnotation
     case unknownVariable
+    case localVariableUsedBeforeDeclaration
+    case changedConstVariable
+    case unfitTwoVariable
+    case invalidOperation
+
     static func getErrorMessage(_ error: Errors, _ expr: Expr) -> String {
         switch (error) {
         case .invalidTypeAnnotation:
@@ -50,9 +60,15 @@ class ErrorBase {
         p.applyCCFormat(textColor: .green)
         print(p)
     }
+
+    func instance() -> ErrorBase {
+        return ErrorBase()
+    }
 }
 
 class Error: ErrorBase {
+
+    static var limitedErrors = 20
 
     init(message: String, details: String, filePath: String, pos: Position) {
         super.init(message, details, filePath, pos, "error")
@@ -65,6 +81,8 @@ class Error: ErrorBase {
 }
 
 class Warning: ErrorBase {
+    static var limitedWarnings = 1
+
     init() {
         super.init("warning")
     }

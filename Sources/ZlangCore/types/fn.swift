@@ -2,6 +2,7 @@
 enum ValueError {
     case notUsed
     case notChanged
+    case notInitialized
     case changedConst
 }
 
@@ -11,10 +12,10 @@ class Value {
     var isUsed: Bool
     var isPub: Bool
     var isVar: Bool
+    var isInitialized: Bool
     var isChanged: Bool
     var isType: Bool
     var access: Access
-    var belongTo: Scope? = nil
 
     init(_ name: String) {
         self.isStatic = false
@@ -23,6 +24,7 @@ class Value {
         self.isVar = false
         self.isChanged = false
         self.isType = false
+        self.isInitialized = false
         self.access = ._internal
         self.name = name
     }
@@ -42,6 +44,7 @@ class Value {
         self.isUsed = false
         self.isPub = isPub
         self.isVar = false
+        self.isInitialized = false
         self.isChanged = false
         self.isType = isType
         self.access = access
@@ -120,6 +123,10 @@ class Fn: Value, Equatable, Hashable {
         self.hash(into: &hasher)
         return hasher.finalize()
     }()
+
+    override func str() -> String {
+        return "Fn(\(name))"
+    }
     
 }
 
@@ -146,6 +153,8 @@ class Arg: Equatable, Hashable {
 class Var: Value, Equatable {
     var typ: Type
     var const: Bool { !isVar }
+    var tableForType: TableForType? = nil
+    var tableForVar: TableForType? = nil
 
     override init(_ name: String) {
         self.typ = Type()!
@@ -154,6 +163,7 @@ class Var: Value, Equatable {
 
     convenience init(_ type: Type, _ name: String, _ table: TableForType) {
         self.init(type, name)
+        self.tableForType = table
     }
 
     convenience init(_ type: Type, _ name: String) {
@@ -161,12 +171,26 @@ class Var: Value, Equatable {
         self.typ = type
     }
 
-    init(_ type: Type, _ name: String, _ isType: Bool, _ isPub: Bool, _ access: Access, _ table: TableForType) {
+    init(_ type: Type, _ name: String, _ isType: Bool, _ isPub: Bool, _ access: Access) {
         self.typ = type
         super.init(name, isType, isPub, access)
     }
 
+    init(_ type: Type, _ name: String, _ isType: Bool, _ isPub: Bool, _ access: Access, _ table: TableForType) {
+        self.typ = type
+        self.tableForType = table
+        super.init(name, isType, isPub, access)
+        if isType {
+            self.tableForVar = TableForType()
+        }
+    }
+
     func setTableForType(_ table: TableForType) {
+        self.tableForType = table
+    }
+
+    func add(_ value: Value) {
+        tableForType!.register(value)
     }
 
     static func ==(_ left: Var, _ right: Var) -> Bool {
@@ -184,6 +208,10 @@ class Var: Value, Equatable {
             return name
         }
         return "type_" + name
+    }
+
+    override func str() -> String {
+        return "Var(\(name))"
     }
 }
 
