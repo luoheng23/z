@@ -2,17 +2,28 @@
 This is a toy language. It is written in swift.
 Its backend is swift. Z compiles code into swift code directly.
 
-# build a compiler
+# Build a compiler
+First you need to install swift language.
 ```bash
-swift build z
+git clone https://github.com/luoheng23/z
+cd z
+swift build
 ```
+Now you get a z compiler!
 # hello world
 ```
 fn main() {
     println('Hello world!')
 }
 ```
-
+# run the code
+```bash
+z hello.z
+```
+Or build it
+```bash
+z build hello.z
+```
 
 ## TODO
 * type check
