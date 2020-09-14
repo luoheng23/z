@@ -1,11 +1,6 @@
 
-const a = 20
-var b = 30
-print(a + b)
-
-fn hello(word int = 20, big int = 30) int {
+fn main() {
     print("Hello world")
-    return word + big
 }
 
-print(hello(3, 4), hello())
+main()

@@ -15,11 +15,7 @@ typealias string = String
 typealias list = Array
 typealias dict = Dictionary
 
-let a = 20
-var  b = 30
-print(a + b)
-func hello(_ word: int = 20, _ big: int = 30) -> int {
+func main() {
     print("Hello world")
-    return word + big
 }
-print(hello(3, 4), hello())
+main()

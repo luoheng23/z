@@ -15,6 +15,8 @@ Now you get a z compiler!
 fn main() {
     println('Hello world!')
 }
+
+mainn()
 ```
 # run the code
 ```bash
