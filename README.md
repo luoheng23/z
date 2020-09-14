@@ -16,7 +16,7 @@ fn main() {
     println('Hello world!')
 }
 
-mainn()
+main()
 ```
 # run the code
 ```bash
