@@ -6,6 +6,7 @@ enum Warnings {
     case unchangedVariable
 }
 
+// TODO
 enum Errors {
     case invalidTypeAnnotation
     case unknownVariable
@@ -20,6 +21,8 @@ enum Errors {
             return "invalid type annotation '\(expr.text())'"
         case .unknownVariable:
             return "use of unresolved identifier '\(expr.text())'"
+        default:
+            return "unknown error"
         }
     }
 }
@@ -59,10 +62,6 @@ class ErrorBase {
         var p = "^"
         p.applyCCFormat(textColor: .green)
         print(p)
-    }
-
-    func instance() -> ErrorBase {
-        return ErrorBase()
     }
 }
 
