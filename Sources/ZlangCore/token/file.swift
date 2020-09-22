@@ -1,4 +1,2 @@
 
-class File {
-    
-}
+class FileSet {}
