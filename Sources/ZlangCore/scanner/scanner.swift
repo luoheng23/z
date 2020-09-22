@@ -25,14 +25,15 @@ class Scanner {
   var filePath: String = "" // filepath
   var lineNr: Int = 0  // number of newline
   var columnNum: Int = 0 // current column
-  var lastNewLinePos: SIndex  // last pos of newline
-  var nextNewLinePos: SIndex {
-    var p = pos
-    while p != text.endIndex && !text[p].isNewLine() && !text[p].isEof() {
-      p = text.index(after: p)
-    }
-    return p
-  }
+
+  // var lastNewLinePos: SIndex  // last pos of newline
+  // var nextNewLinePos: SIndex {
+  //   var p = pos
+  //   while p != text.endIndex && !text[p].isNewLine() && !text[p].isEof() {
+  //     p = text.index(after: p)
+  //   }
+  //   return p
+  // }
 
   let slash: Character = "\\"
 
@@ -58,8 +59,7 @@ class Scanner {
   }
 
   func newToken(_ kind: Kind, _ lit: String, _ len: Int) -> Token {
-    let pos = Position(count: len, lineNr: lineNr + 1, pos: self.columnNum - len + 1, 
-                  lineBegin: lastNewLinePos)
+    let pos = Position(filePath, self.pos, len, lineNr + 1, self.columnNum - len + 1)
     tokenNum += 1
     return Token(kind: kind, lit: lit, pos: pos)
   }

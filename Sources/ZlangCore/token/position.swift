@@ -2,36 +2,42 @@
 typealias SIndex = String.UnicodeScalarView.Index
 typealias SString = String
 
-class Position {
+class Position: Object {
     var filename: String
     var offset: SIndex
+    var count: Int
     var line: Int
     var column: Int
 
-    init() {
+    var startPos: Int { pos }
+    var endPos: Int { pos + count }
+
+    override init() {
         self.filename = ""
         self.offset = "".startIndex
+        self.count = 0
         self.line = 0
         self.column = 0
     }
 
-    init(filename: Int, offset: Int, line: Int, column: SIndex) {
+    init(_ filename: Int, _ offset: SIndex, _ count: Int, _ line: Int, _ column: SIndex) {
         self.filename = filename
         self.offset = offset
+        self.count = count
         self.line = line
         self.column = column
     }
 
-    convenience init(pos: Position) {
-        self.init(pos.filename, pos.offset, pos.line, pos.column)
-    }
-
-    func str() -> String {
-        
+    init(_ pos: Position) {
+        self.filename = pos.filename
+        self.offset = pos.offset
+        self.count = pos.count
+        self.line = pos.line
+        self.column = pos.column
     }
 
     func getPositionText(text: String) -> String {
-        return String(text[text.index(lineBegin, after: startPos)...text.index(lineBegin, after: endPos)])
+        return String(text[offset...text.index(offset, offsetBy: count)])
     }
 
     func addPosition(_ end: Position) {

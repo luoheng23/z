@@ -54,9 +54,9 @@ class ErrorBase {
 
     func printError() {
         setColor()
-        print("\(filePath):\(pos.lineNr):\(pos.startPos): \(type): \(message)")
+        print("\(pos):\(type): \(message)")
         print(details)
-        for _ in 0..<pos.pos {
+        for _ in 0..<pos.column {
             print(" ", terminator: "")
         }
         var p = "^"

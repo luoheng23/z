@@ -1,5 +1,5 @@
 
-class Ast(Position) { 
+class Ast: Position { 
     // readonly node name
     var node: String { String(describing: type(of: self)) }
 

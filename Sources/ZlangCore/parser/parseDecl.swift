@@ -60,7 +60,7 @@ extension Parser {
         }
         let basicName = basicNameDecl(false)
         basicName.isVar = isVar
-        pos.addPosition(basicName.pos)
+        pos.addPosition(basicName)
         return NameDecl(basicName, pos)
     }
 
@@ -72,7 +72,7 @@ extension Parser {
         }
         let basicName = basicNameDecl(!isReturn)
         basicName.isVar = isVar
-        pos.addPosition(basicName.pos)
+        pos.addPosition(basicName)
         let decl = ArgDecl(basicName, pos)
         if isReturn {
             decl.isReturn = true
@@ -84,7 +84,7 @@ extension Parser {
         let pos = tok.pos
         check(.key_case)
         let name = nameExpr()
-        pos.addPosition(name.pos)
+        pos.addPosition(name)
         return EnumValueDecl(name, pos)
     }
 
@@ -114,7 +114,7 @@ extension Parser {
         if isTok(.assign) {
             check(.assign)
             right = tupleExpr()
-            pos.addPosition(right!.pos)
+            pos.addPosition(right!)
         }
         if let r = right {
             return TupleNameDecl(left, pos, r, isVar)
@@ -138,7 +138,7 @@ extension Parser {
             check(.assign)
         }
         let type = expr()
-        pos.addPosition(type.pos)
+        pos.addPosition(type)
         return TypeDecl(name, pos, type, isAlias)
     } 
 
@@ -154,14 +154,14 @@ extension Parser {
             } else {
                 returns = argDecl(true)
             }
-            pos.addPosition(returns!.pos)
+            pos.addPosition(returns!)
         }
         var blockStmt: BlockStmt?
         if isTok(.lcbr) {
             blockStmt = self.blockStmt()
         }
         if let b = blockStmt {
-            pos.addPosition(b.pos)
+            pos.addPosition(b)
             if let r = returns {
                 return FnDecl(name, pos, args, r, b)
             }

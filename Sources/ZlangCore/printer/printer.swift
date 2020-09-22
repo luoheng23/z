@@ -5,9 +5,7 @@ class Whitespace {
 
     static let ignore = whiteSpace(0)
     static let blank = whiteSpace(" ")
-    static let vtab = whiteSpace("\v")
     static let newline = whiteSpace("\n")
-    static let formfeed = whiteSpace("\f")
     static let indent = whiteSpace(">")
     static let unindent = whiteSpace("<")
 }
@@ -29,5 +27,5 @@ class Config {}
 class Printer {
     var cfg: Config
 
-    
+
 }
