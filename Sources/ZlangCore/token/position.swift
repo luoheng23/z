@@ -25,8 +25,8 @@ class Position {
         self.pos = pos
     }
 
-    init(pos: Position) {
-        self = pos
+    convenience init(pos: Position) {
+        self.init(pos.count, pos.lineNr, pos.pos, pos.lineBegin)
     }
 
     func str() -> String {
@@ -34,7 +34,7 @@ class Position {
     }
 
     func getPositionText(text: String) -> String {
-        return text[text.index(lineBegin, after: startPos)...text.index(lineBegin, after: endPos)]
+        return String(text[text.index(lineBegin, after: startPos)...text.index(lineBegin, after: endPos)])
     }
 
     func addPosition(_ end: Position) {
