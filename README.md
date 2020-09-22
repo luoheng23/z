@@ -1,4 +1,6 @@
 # z language
+![Swift](https://github.com/luoheng23/z/workflows/Swift/badge.svg)
+
 This is a toy language. It is written in swift.
 Its backend is swift. Z compiles code into swift code directly.
 
