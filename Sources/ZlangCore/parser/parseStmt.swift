@@ -70,7 +70,7 @@ extension Parser {
         }
       }
     }
-    pos.addPosition(tok)
+    pos.addPosition(tok.pos)
     check(.rcbr)
     return BlockStmt(stmts: stmts, pos)
   }
@@ -154,7 +154,7 @@ extension Parser {
       while isTok(.comment) {
           comments.append(check(.comment).lit)
       }
-      pos.addPosition(preTok)
+      pos.addPosition(preTok.pos)
       return CommentStmt(comments, pos)
   }
 
@@ -202,7 +202,7 @@ extension Parser {
         branches.append(SwitchBranch(block, pos))
       }
     }
-    pos.addPosition(tok)
+    pos.addPosition(tok.pos)
     check(.rcbr)
     return SwitchStmt(cond, branches, pos)
   }

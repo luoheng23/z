@@ -111,19 +111,19 @@ extension Parser {
     }
 
     func callExpr(_ left: Expr) -> Expr {
-        let pos = left.pos
+        let pos = left.clone()
         let args = tupleExpr()
-        pos.addPosition(args.pos)
+        pos.addPosition(args)
         return CallExpr(left, args, pos)
     }
 
     func ifElseExpr(_ left: Expr) -> IfElseExpr {
-        let pos = left.pos
+        let pos = left.clone()
         check(.question)
         let truePart = expr()
         check(.colon)
         let falsePart = expr()
-        pos.addPosition(falsePart.pos)
+        pos.addPosition(falsePart)
         return IfElseExpr(left, truePart, falsePart, pos)
     }
 }

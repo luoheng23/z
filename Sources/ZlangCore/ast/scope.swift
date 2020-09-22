@@ -66,7 +66,7 @@ class Scope {
         return sc
     }
 
-    func innermost(_ pos: Int) -> Scope {
+    func innermost(_ pos: Position) -> Scope {
         if !contains(pos) {
             return self
         }
@@ -74,7 +74,7 @@ class Scope {
         while first <= last {
             let mid = (first + last) / 2
             let s1 = children[mid]
-            if s1.pos.endPos < pos {
+            if !s1.pos.isLeft(pos) {
                 first = mid + 1
             } else if s1.contains(pos) {
                 return s1.innermost(pos)
@@ -85,7 +85,7 @@ class Scope {
         return self
     }
 
-    func contains(_ pos: Int) -> Bool {
+    func contains(_ pos: Position) -> Bool {
         return self.pos.contains(pos)
     }
 }

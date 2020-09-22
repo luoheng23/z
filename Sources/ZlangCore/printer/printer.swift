@@ -12,10 +12,10 @@ class Whitespace {
 
 class CommentGroup {}
 class CommentInfo {
-    var cindex: Int
-    var comment: CommentGroup
-    var commentOffset: Int
-    var commentNewline: Bool
+    var cindex: Int = 0
+    var comment: CommentGroup = CommentGroup()
+    var commentOffset: Int = 0
+    var commentNewline: Bool = true
 }
 
 let maxNewlines = 2
@@ -25,7 +25,7 @@ var debug = false
 
 class Config {}
 class Printer {
-    var cfg: Config
+    var cfg: Config = Config()
 
 
 }

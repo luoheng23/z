@@ -26,14 +26,14 @@ class Scanner {
   var lineNr: Int = 0  // number of newline
   var columnNum: Int = 0 // current column
 
-  // var lastNewLinePos: SIndex  // last pos of newline
-  // var nextNewLinePos: SIndex {
-  //   var p = pos
-  //   while p != text.endIndex && !text[p].isNewLine() && !text[p].isEof() {
-  //     p = text.index(after: p)
-  //   }
-  //   return p
-  // }
+  var lastNewLinePos: SIndex  // last pos of newline
+  var nextNewLinePos: SIndex {
+    var p = pos
+    while p != text.endIndex && !text[p].isNewLine() && !text[p].isEof() {
+      p = text.index(after: p)
+    }
+    return p
+  }
 
   let slash: Character = "\\"
 

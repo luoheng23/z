@@ -5,46 +5,78 @@ typealias SString = String
 class Position: Object {
     var filename: String
     var offset: SIndex
-    var count: Int
+    var len: Int
     var line: Int
+    var endLine: Int
     var column: Int
-
-    var startPos: Int { pos }
-    var endPos: Int { pos + count }
+    var endColumn: Int
 
     override init() {
         self.filename = ""
         self.offset = "".startIndex
-        self.count = 0
+        self.len = 0
         self.line = 0
+        self.endLine = 0
         self.column = 0
+        self.endColumn = 0
     }
 
-    init(_ filename: Int, _ offset: SIndex, _ count: Int, _ line: Int, _ column: SIndex) {
+    init(_ filename: String, _ offset: SIndex, _ len: Int, _ line: Int, _ column: Int) {
         self.filename = filename
         self.offset = offset
-        self.count = count
+        self.len = len
         self.line = line
+        self.endLine = line
         self.column = column
+        self.endColumn = column
     }
 
     init(_ pos: Position) {
         self.filename = pos.filename
         self.offset = pos.offset
-        self.count = pos.count
+        self.len = pos.len
         self.line = pos.line
+        self.endLine = pos.endLine
         self.column = pos.column
+        self.endColumn = pos.endColumn
     }
 
     func getPositionText(text: String) -> String {
-        return String(text[offset...text.index(offset, offsetBy: count)])
+        return String(text[offset...text.index(offset, offsetBy: len)])
     }
 
+    // end must be next to the current position, and is after it
+    // they must be the same line
     func addPosition(_ end: Position) {
-        count = end.pos - self.pos + end.count
+        // same line
+        self.len += end.len
+        self.endLine = end.endLine
+        self.endColumn = end.endColumn
     }
 
-    func contains(_ pos: Int) -> Bool {
-        return startPos <= pos && pos <= endPos
+    func contains(_ pos: Position) -> Bool {
+        if self.line > pos.line || self.endLine < pos.endLine {
+            return false
+        }
+        if self.line == pos.line && self.endLine == pos.endLine {
+            if self.column > pos.column || self.column <= pos.column && self.len < pos.len {
+                return false
+            }
+        }
+        return true
+    }
+
+    func isLeft(_ pos: Position) -> Bool {
+        if self.line > pos.endLine {
+            return true
+        }
+        if self.line == pos.endLine && self.column >= pos.endColumn {
+            return true
+        }
+        return false
+    }
+
+    func clone() -> Position {
+        return Position(self)
     }
 }
