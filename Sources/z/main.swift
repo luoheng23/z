@@ -17,12 +17,20 @@ func main() {
         task.arguments = ["swift", parse.filePath]
     }
     parse.parseToFile()
-    task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+    if #available(OSX 10.13, *) {
+        task.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+    } else {
+        task.launchPath = "/usr/bin/env"
+    }
     task.standardOutput = FileHandle.standardOutput
     task.standardInput = FileHandle.standardInput
     task.standardError = FileHandle.standardError
     do {
-        try task.run()
+        if #available(OSX 10.13, *) {
+            try task.run()
+        } else {
+            task.launch()
+        }
     } catch let err {
         print("err: \(err)")
     }
