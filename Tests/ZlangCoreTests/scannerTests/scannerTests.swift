@@ -79,7 +79,7 @@ final class ScannerTests: XCTestCase {
         var b = 20
         print(a + b)
         """
-        let answer = ["const", "a", "=", "10", "var", "b", "=", "20", "print", "a", "+", "b"]
+        let answer = ["const", "a", "=", "10", "var", "b", "=", "20", "print", "(", "a", "+", "b", ")"]
         let scanner = Scanner(str)
         for word in answer {
             let name = scanner.scan().lit
@@ -133,6 +133,7 @@ final class ScannerTests: XCTestCase {
     static var allTests = [
         ("testInitScanner", testInitScanner),
         ("testName", testName),
+        ("testScan", testScan),
         ("testNumber", testNumber),
         ("testString", testString),
         ("testComment", testComment),
