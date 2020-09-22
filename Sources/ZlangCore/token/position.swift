@@ -3,34 +3,31 @@ typealias SIndex = String.UnicodeScalarView.Index
 typealias SString = String
 
 class Position {
-    var lineBegin: SIndex
-    var lineNr: Int
-    var pos: Int
-    var count: Int = 0
-
-    var startPos: Int { return pos }
-    var endPos: Int { return pos + count }
+    var filename: String
+    var offset: SIndex
+    var line: Int
+    var column: Int
 
     init() {
-        self.lineBegin = "".startIndex
-        self.lineNr = 0
-        self.pos = 0
-        self.count = 0
+        self.filename = ""
+        self.offset = "".startIndex
+        self.line = 0
+        self.column = 0
     }
 
-    init(count: Int, lineNr: Int, pos: Int, lineBegin: SIndex) {
-        self.lineNr = lineNr
-        self.count = count
-        self.lineBegin = lineBegin
-        self.pos = pos
+    init(filename: Int, offset: Int, line: Int, column: SIndex) {
+        self.filename = filename
+        self.offset = offset
+        self.line = line
+        self.column = column
     }
 
     convenience init(pos: Position) {
-        self.init(pos.count, pos.lineNr, pos.pos, pos.lineBegin)
+        self.init(pos.filename, pos.offset, pos.line, pos.column)
     }
 
     func str() -> String {
-        return "Position(lineNr: \(lineNr), pos: \(pos), length: \(count)"
+        
     }
 
     func getPositionText(text: String) -> String {

@@ -1,5 +1,5 @@
 
-class whitespace {
+class Whitespace {
     
     typealias whiteSpace = UInt8
 
@@ -12,9 +12,22 @@ class whitespace {
     static let unindent = whiteSpace("<")
 }
 
-class Printer {
-    let maxNewlines = 2
-    let infinity = 1 << 30
+class CommentGroup {}
+class CommentInfo {
+    var cindex: Int
+    var comment: CommentGroup
+    var commentOffset: Int
+    var commentNewline: Bool
+}
 
-    var debug = false
+let maxNewlines = 2
+let infinity = 1 << 30
+
+var debug = false
+
+class Config {}
+class Printer {
+    var cfg: Config
+
+    
 }
