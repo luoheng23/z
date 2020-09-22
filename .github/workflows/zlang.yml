@@ -14,6 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: swift build -Xswiftc "-target" -Xswiftc "x86_64-apple-macosx10.13 -v
+      run: swift build -v
     - name: Run tests
       run: swift test -v
