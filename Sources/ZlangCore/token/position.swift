@@ -79,4 +79,25 @@ class Position: Object {
     func clone() -> Position {
         return Position(self)
     }
+
+    func isValid() -> Bool {
+        return self.line > 0
+    }
+
+    override var description: String {
+        var str = self.filename
+        if self.isValid() {
+            if str != "" {
+                str += ":"
+            }
+            str += String(self.line)
+            if self.column != 0 {
+                str += ":" + String(self.column)
+            }
+        }
+        if str == "" {
+            str = "-"
+        }
+        return str
+    }
 }

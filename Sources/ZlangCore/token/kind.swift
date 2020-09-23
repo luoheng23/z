@@ -245,7 +245,6 @@ public enum Kind: String {
     return getKind(String(chars))
   }
 
-
   static func isAssign(_ str: String) -> Bool {
     return Assigns.contains(getKind(str))
   }
