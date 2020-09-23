@@ -37,13 +37,11 @@ extension Parser {
     let pos = tok.pos
     let left = expr()
     if !tok.kind.isAssign() {
-      pos.addPosition(left)
       return ExprStmt(left, pos)
     }
     let op = tok.kind
     check(op)
     let right = expr()
-    pos.addPosition(right)
     return AssignStmt(left, op, right, pos)
   }
 
@@ -70,7 +68,6 @@ extension Parser {
         }
       }
     }
-    pos.addPosition(tok.pos)
     check(.rcbr)
     return BlockStmt(stmts: stmts, pos)
   }
@@ -100,7 +97,6 @@ extension Parser {
       cond = expr()
     }
     let block = blockStmt()
-    pos.addPosition(block)
     if let c = cond {
       return ForStmt(c, block, pos)
     }
@@ -111,7 +107,6 @@ extension Parser {
     let pos = tok.pos
     check(.key_import)
     let name = nameExpr()
-    pos.addPosition(name)
     return ImportStmt(name, pos)
   }
 
@@ -120,7 +115,6 @@ extension Parser {
     check(.key_with)
     let namedecl = nameDecl()
     let block = blockStmt()
-    pos.addPosition(block)
     return WithStmt(namedecl, block, pos)
   }
 
@@ -128,7 +122,6 @@ extension Parser {
     let pos = tok.pos
     check(.key_go)
     let expr = self.expr()
-    pos.addPosition(expr)
     return GoStmt(expr, pos)
   }
 
@@ -136,7 +129,6 @@ extension Parser {
     let pos = tok.pos
     check(.key_return)
     let expr = self.expr()
-    pos.addPosition(expr)
     return ReturnStmt(expr, pos)
   }
 
@@ -144,7 +136,6 @@ extension Parser {
       let pos = tok.pos
       check(.key_defer)
       let expr = self.expr()
-      pos.addPosition(expr)
       return DeferStmt(expr, pos)
   }
 
@@ -154,7 +145,6 @@ extension Parser {
       while isTok(.comment) {
           comments.append(check(.comment).lit)
       }
-      pos.addPosition(preTok.pos)
       return CommentStmt(comments, pos)
   }
 
@@ -164,18 +154,15 @@ extension Parser {
     let cond = expr()
     let trueBlock = blockStmt()
     if !isTok(.key_else) {
-      pos.addPosition(trueBlock)
       return IfStmt(cond, trueBlock, pos)
     }
     check(.key_else)
     var falseBlock: IfStmt
     if isTok(.key_if) {
       falseBlock = ifStmt()
-      pos.addPosition(falseBlock)
       return IfStmt(cond, trueBlock, falseBlock, pos)
     }
     let block = blockStmt()
-    pos.addPosition(block)
     falseBlock = IfStmt(block, pos)
     return IfStmt(cond, trueBlock, falseBlock, pos)
   }
@@ -193,16 +180,13 @@ extension Parser {
         check(.key_case)
         let cond = expr()
         let block = blockStmt()
-        pos.addPosition(block)
         branches.append(SwitchBranch(cond, block, pos))
       } else if isTok(.key_default) {
         check(.key_default)
         let block = blockStmt()
-        pos.addPosition(block)
         branches.append(SwitchBranch(block, pos))
       }
     }
-    pos.addPosition(tok.pos)
     check(.rcbr)
     return SwitchStmt(cond, branches, pos)
   }

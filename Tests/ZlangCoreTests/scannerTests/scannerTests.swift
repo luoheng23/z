@@ -26,15 +26,6 @@ final class ScannerTests: XCTestCase {
         super.tearDown()
     }
 
-    func testInitScanner() {
-        let filename = "test.z"
-        XCTAssertFalse(folder.containsFile(named: filename))
-        let file = try? folder.createFile(named: filename)
-        XCTAssert(file != nil && file!.name == filename)
-        let scanner = Scanner(filePath: folder.path + filename)
-        XCTAssert(scanner.filePath == folder.path + filename, "init scanner filename failed.")
-    }
-
     func testName() {
         let str = "name hello good th 恶魔"
         let answer = str.split(separator: " ")
@@ -131,7 +122,6 @@ final class ScannerTests: XCTestCase {
     }
 
     static var allTests = [
-        ("testInitScanner", testInitScanner),
         ("testName", testName),
         ("testScan", testScan),
         ("testNumber", testNumber),

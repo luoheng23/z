@@ -60,7 +60,6 @@ extension Parser {
         }
         let basicName = basicNameDecl(false)
         basicName.isVar = isVar
-        pos.addPosition(basicName)
         return NameDecl(basicName, pos)
     }
 
@@ -72,7 +71,6 @@ extension Parser {
         }
         let basicName = basicNameDecl(!isReturn)
         basicName.isVar = isVar
-        pos.addPosition(basicName)
         let decl = ArgDecl(basicName, pos)
         if isReturn {
             decl.isReturn = true
@@ -84,7 +82,6 @@ extension Parser {
         let pos = tok.pos
         check(.key_case)
         let name = nameExpr()
-        pos.addPosition(name)
         return EnumValueDecl(name, pos)
     }
 
@@ -92,7 +89,6 @@ extension Parser {
         let pos = tok.pos
         check(.lpar)
         let args = basicTupleExpr({() -> ArgDecl in argDecl(isReturn) })
-        pos.addPosition(tok.pos)
         check(.rpar)
         let tupleArgs = TupleArgDecl(args, pos)
         return tupleArgs
@@ -108,13 +104,11 @@ extension Parser {
         }
         check(.lpar)
         let left = basicTupleExpr({() -> OneNameAnnotationDecl in basicNameDecl() })
-        pos.addPosition(tok.pos)
         check(.rpar)
         var right: TupleExpr? = nil
         if isTok(.assign) {
             check(.assign)
             right = tupleExpr()
-            pos.addPosition(right!)
         }
         if let r = right {
             return TupleNameDecl(left, pos, r, isVar)
@@ -138,7 +132,6 @@ extension Parser {
             check(.assign)
         }
         let type = expr()
-        pos.addPosition(type)
         return TypeDecl(name, pos, type, isAlias)
     } 
 
@@ -154,14 +147,12 @@ extension Parser {
             } else {
                 returns = argDecl(true)
             }
-            pos.addPosition(returns!)
         }
         var blockStmt: BlockStmt?
         if isTok(.lcbr) {
             blockStmt = self.blockStmt()
         }
         if let b = blockStmt {
-            pos.addPosition(b)
             if let r = returns {
                 return FnDecl(name, pos, args, r, b)
             }
@@ -207,7 +198,6 @@ extension Parser {
                 }
             }
         }
-        pos.addPosition(tok.pos)
         check(.rcbr)
         return BlockDecl(decls, pos)
     }

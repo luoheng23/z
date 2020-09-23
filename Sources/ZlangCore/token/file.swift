@@ -3,7 +3,6 @@ class FileSet {}
 class lineInfo {}
 
 class ZFile {
-    var fileSet: FileSet = FileSet()
     var name: String = ""
     var base: Int = 0
     var size: Int = 0
@@ -11,7 +10,13 @@ class ZFile {
     var lines: [SIndex] = []
     var infos: [lineInfo] = []
 
+    init() {}
 
+    init(_ name: String, _ size: Int) {
+        self.name = name
+        self.base = 0
+        self.size = size
+    }
     func lineCount() -> Int {
         return lines.count
     }

@@ -1,66 +1,46 @@
 import Files
 
+typealias SIndex = String.UnicodeScalarView.Index
+typealias SString = String
+
 class Scanner {
 
   var text: SString
   var pos: SIndex
 
-  var startIndex: SIndex {
-    return self.text.startIndex
-  }
-
-  var endIndex: SIndex {
-    return self.text.endIndex
-  }
-
   var isAtEnd: Bool {
-    return self.pos == self.endIndex
+    return self.pos == self.text.endIndex
   }
 
   var isAtBegin: Bool {
-    return self.pos == self.startIndex
+    return self.pos == self.text.startIndex
   }
 
-  let count: Int // total length of text
-  var filePath: String = "" // filepath
-  var lineNr: Int = 0  // number of newline
-  var columnNum: Int = 0 // current column
+  var file: ZFile = ZFile()
 
-  var lastNewLinePos: SIndex  // last pos of newline
-  var nextNewLinePos: SIndex {
-    var p = pos
-    while p != text.endIndex && !text[p].isNewLine() && !text[p].isEof() {
-      p = text.index(after: p)
-    }
-    return p
-  }
+  var offset: Int = 0
+  var column: Int = 0
+  var lineNum: Int = 0
 
-  let slash: Character = "\\"
+  var insertSemi: Bool = false
+  var errorCount: Int = 0
 
   var prevTok: Token? // previous token
-  var tokenNum: Int = 0  // current tokens
+  var tok: Token = Token()
 
-
-  convenience init(filePath: String) {
-    if let file = try? (try? File(path: filePath))?.read() {
-      self.init(String(decoding: file, as: UTF8.self))
-      self.filePath = filePath
-    } else {
-      self.init("")
-      error("\(filePath) doesn't exist")
-    }
+  init(file: ZFile, src: String) {
+    self.file = file
+    self.text = src
+    self.pos = src.startIndex
   }
 
   init(_ string: String) {
     self.pos = string.startIndex
-    self.lastNewLinePos = string.startIndex
     self.text = string
-    self.count = string.count
   }
 
   func newToken(_ kind: Kind, _ lit: String, _ len: Int) -> Token {
-    let pos = Position(filePath, self.pos, len, lineNr + 1, self.columnNum - len + 1)
-    tokenNum += 1
+    let pos = Position(file.name, offset, lineNum + 1, self.column - len + 1)
     return Token(kind: kind, lit: lit, pos: pos)
   }
 
@@ -72,7 +52,7 @@ class Scanner {
   func nextPos() {
     if peek() != nil {
       pos = text.index(after: pos)
-      columnNum += 1
+      column += 1
     }
   }
 
@@ -100,10 +80,10 @@ class Scanner {
   }
 
   func index(pos: SIndex, after: Int) -> SIndex {
-    if let res = text.index(pos, offsetBy: after, limitedBy: endIndex) {
+    if let res = text.index(pos, offsetBy: after, limitedBy: text.endIndex) {
       return res
     }
-    return endIndex
+    return text.endIndex
   }
 
   func _getStr(_ start: SIndex, _ end: SIndex) -> String {
@@ -141,9 +121,9 @@ class Scanner {
   }
 
   func incLineNum() {
-    lastNewLinePos = pos
-    lineNr += 1
-    columnNum = 0
+    file.addLine(index(pos: pos, after: 1))
+    lineNum += 1
+    column = 0
   }
 
   func hexNum() -> String {
@@ -238,7 +218,7 @@ class Scanner {
         break consumeLoop
       }
       for char in endChar {
-        if expect(want: char, startPos: pos) && countSymBefore(before: pos, symbol: slash) % 2 == 0
+        if expect(want: char, startPos: pos) && countSymBefore(before: pos, symbol: "\\") % 2 == 0
         {
           break consumeLoop
         }
@@ -254,7 +234,7 @@ class Scanner {
       if isAtEnd {
         break
       }
-      if expect(want: quote, startPos: pos) && countSymBefore(before: pos, symbol: slash) % 2 == 0 {
+      if expect(want: quote, startPos: pos) && countSymBefore(before: pos, symbol: "\\") % 2 == 0 {
         // end of str
         pos = index(pos: pos, after: quote.count)
         break
@@ -267,7 +247,7 @@ class Scanner {
           error("Parse string meets unexpected newline")
         }
       }
-      // if let c = peek(), c == "{" && countSymBefore(before: pos, symbol: slash) % 2 == 0 {
+      // if let c = peek(), c == "{" && countSymBefore(before: pos, symbol: "\\") % 2 == 0 {
       //   consumeTillSymbol(endChar: [Kind.rcbr.rawValue, quote])
       // }
       nextPos()
@@ -292,7 +272,7 @@ class Scanner {
   }
 
   func getLineInfo(_ pos: Position) -> String {
-    return String(text[lastNewLinePos..<nextNewLinePos])
+    return String(text[file.lines[pos.line]..<file.lines[pos.line+1]])
   }
 
   func scan(_ skipWhitespace: Bool = true) -> Token {
@@ -302,7 +282,7 @@ class Scanner {
       if tok.kind == .eof {
         break
       }
-      if !skipWhitespace || tok.kind != .space && tok.kind != .nl{
+      if !skipWhitespace || tok.kind != .space && tok.kind != .nl {
         break
       }
     } while true

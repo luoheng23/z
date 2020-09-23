@@ -50,7 +50,6 @@ extension Parser {
         let pos = tok.pos
         check(.lpar)
         let n = basicTupleExpr({ () -> Expr in expr() })
-        pos.addPosition(tok.pos)
         check(.rpar)
         let node = TupleExpr(n, pos)
         return node
@@ -98,7 +97,6 @@ extension Parser {
         let pos = tok.pos
         check(.lsbr)
         let fieldExpr = expr()
-        pos.addPosition(tok.pos)
         check(.rsbr)
         return IndexExpr(left, fieldExpr, pos)
     }
@@ -111,19 +109,17 @@ extension Parser {
     }
 
     func callExpr(_ left: Expr) -> Expr {
-        let pos = left.clone()
+        let pos = left
         let args = tupleExpr()
-        pos.addPosition(args)
         return CallExpr(left, args, pos)
     }
 
     func ifElseExpr(_ left: Expr) -> IfElseExpr {
-        let pos = left.clone()
+        let pos = left
         check(.question)
         let truePart = expr()
         check(.colon)
         let falsePart = expr()
-        pos.addPosition(falsePart)
         return IfElseExpr(left, truePart, falsePart, pos)
     }
 }

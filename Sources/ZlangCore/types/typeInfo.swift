@@ -1,47 +1,47 @@
 
-class TypeInfo {}
+// class TypeInfo {}
 
-class EnumCase {
-    var associateType: Type?
-    var name: String
-    var rawValue: String
+// class EnumCase {
+//     var associateType: Type?
+//     var name: String
+//     var rawValue: String
 
-    init(_ name: String, _ rawValue: String = "") {
-        self.name = name
-        self.rawValue = rawValue == "" ? name : rawValue
-        self.associateType = nil
-    }
+//     init(_ name: String, _ rawValue: String = "") {
+//         self.name = name
+//         self.rawValue = rawValue == "" ? name : rawValue
+//         self.associateType = nil
+//     }
 
-    convenience init(_ name: String, _ rawValue: String = "", _ type: Type) {
-        self.init(name, rawValue)
-        self.associateType = type
-    }
-}
+//     convenience init(_ name: String, _ rawValue: String = "", _ type: Type) {
+//         self.init(name, rawValue)
+//         self.associateType = type
+//     }
+// }
 
-class Enum: TableForType {
-    var cases: [EnumCase] = []
-}
+// class Enum: TableForType {
+//     var cases: [EnumCase] = []
+// }
 
-class Alias: TableForType {
-    var parentType: TableForType
+// class Alias: TableForType {
+//     var parentType: TableForType
 
-    init(_ name: String, _ type: TableForType) {
-        self.parentType = type
-        super.init()
-        // self.name = name
-    }
-}
+//     init(_ name: String, _ type: TableForType) {
+//         self.parentType = type
+//         super.init()
+//         // self.name = name
+//     }
+// }
 
-class Struct: TableForType {}
+// class Struct: TableForType {}
 
-class List: TableForType {
-    var dims: Int = 0
-    var size: Int = 0
-}
+// class List: TableForType {
+//     var dims: Int = 0
+//     var size: Int = 0
+// }
 
-class Dict: TableForType {
-}
+// class Dict: TableForType {
+// }
 
-class Interface: TableForType {
-    var types: [Type] = []
-}
+// class Interface: TableForType {
+//     var types: [Type] = []
+// }

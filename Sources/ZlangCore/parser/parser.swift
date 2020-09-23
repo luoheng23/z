@@ -29,7 +29,13 @@ public class Parser {
     self.originPath = filePath
     self.filePath = String(filePath.split(separator: ".")[0] + ".swift")
     self.scope = globalScope
-    self.scanner = Scanner(filePath: filePath)
+    if let data = try? (try? File(path: Parser.builtinType))?.read() {
+      self.scanner = Scanner(file: ZFile(filePath, data.count), src: String(decoding: data, as: UTF8.self))
+    } else {
+      self.scanner = Scanner("")
+      error("unknown file: \(filePath)")
+    }
+
   }
 
   public init(str: String) {
@@ -53,7 +59,6 @@ public class Parser {
     if scope === globalScope {
       fatalError("unexpected close global scope")
     }
-    scope.pos.addPosition(preTok.pos)
     scope.parent!.children.append(scope)
     scope = scope.parent!
   }
