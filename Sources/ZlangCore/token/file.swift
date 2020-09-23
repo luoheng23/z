@@ -1,4 +1,7 @@
 
+class FileSet {}
+class lineInfo {}
+
 class ZFile {
     var fileSet: FileSet = FileSet()
     var name: String = ""
@@ -10,10 +13,10 @@ class ZFile {
 
 
     func lineCount() -> Int {
-        return len(lines)
+        return lines.count
     }
 
-    func addLine(offset SIndex) {
+    func addLine(_ offset: SIndex) {
         lines.append(offset)
     }
 
@@ -21,7 +24,7 @@ class ZFile {
         if line >= lineCount() {
             fatalError("illegal line number")
         }
-        lines[line...line+2] = lines[line]
+        lines[line...line+2] = [lines[line]]
     }
 
     func setLines(_ lines: [SIndex]) {}
