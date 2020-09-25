@@ -73,20 +73,20 @@ extension Parser {
   }
 
   func branchStmt() -> BranchStmt {
-      switch (tok.kind) {
-      case .key_break:
-        let name = check(.key_break)
-        return BreakStmt(name.lit, name.pos)
-      case .key_continue:
-        let name = check(.key_continue)
-        return ContinueStmt(name.lit, name.pos)
-      case .key_fallthrough:
-        let name = check(.key_fallthrough)
-        return FallthroughStmt(name.lit, name.pos)
-      default:
-        error("unreachable code")
-        return BranchStmt("", tok.pos)
-      }
+    switch tok.kind {
+    case .key_break:
+      let name = check(.key_break)
+      return BreakStmt(name.lit, name.pos)
+    case .key_continue:
+      let name = check(.key_continue)
+      return ContinueStmt(name.lit, name.pos)
+    case .key_fallthrough:
+      let name = check(.key_fallthrough)
+      return FallthroughStmt(name.lit, name.pos)
+    default:
+      error("unreachable code")
+      return BranchStmt("", tok.pos)
+    }
   }
 
   func forStmt() -> ForStmt {
@@ -133,19 +133,19 @@ extension Parser {
   }
 
   func deferStmt() -> DeferStmt {
-      let pos = tok.pos
-      check(.key_defer)
-      let expr = self.expr()
-      return DeferStmt(expr, pos)
+    let pos = tok.pos
+    check(.key_defer)
+    let expr = self.expr()
+    return DeferStmt(expr, pos)
   }
 
   func commentStmt() -> CommentStmt {
-      let pos = tok.pos
-      var comments: [String] = []
-      while isTok(.comment) {
-          comments.append(check(.comment).lit)
-      }
-      return CommentStmt(comments, pos)
+    let pos = tok.pos
+    var comments: [String] = []
+    while isTok(.comment) {
+      comments.append(check(.comment).lit)
+    }
+    return CommentStmt(comments, pos)
   }
 
   func ifStmt() -> IfStmt {
@@ -166,7 +166,6 @@ extension Parser {
     falseBlock = IfStmt(block, pos)
     return IfStmt(cond, trueBlock, falseBlock, pos)
   }
-
 
   func switchStmt() -> Stmt {
     let pos = tok.pos

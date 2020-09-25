@@ -31,7 +31,8 @@ public class Parser {
     self.scope = globalScope
 
     if let data = try? (try? File(path: filePath))?.read() {
-      self.scanner = Scanner(file: ZFile(filePath, data.count), src: String(decoding: data, as: UTF8.self))
+      self.scanner = Scanner(
+        file: ZFile(filePath, data.count), src: String(decoding: data, as: UTF8.self))
     } else {
       self.scanner = Scanner("")
       error("unknown file: \(filePath)")
@@ -110,7 +111,8 @@ public class Parser {
   public func parseToFile() {
     let module = stmts()
     if let file = try? File(path: filePath),
-      let typ = try? (try? File(path: Parser.builtinType))?.read() {
+      let typ = try? (try? File(path: Parser.builtinType))?.read()
+    {
       _ = try? file.write("")
       _ = try? file.append(String(decoding: typ, as: UTF8.self))
       _ = try? file.append(module.gen())

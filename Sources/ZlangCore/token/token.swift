@@ -44,9 +44,11 @@ class Token {
   }
 
   func isInfix() -> Bool {
-    return [Kind.plus, .minus, .mod, .mul, .div, .pow, .eq, .ne, .gt, .lt, .key_in,
+    return [
+      Kind.plus, .minus, .mod, .mul, .div, .pow, .eq, .ne, .gt, .lt, .key_in,
       .key_not_in, .key_is, .key_is_not, .ge, .le, .key_or, .xor, .key_and, .pipe, .amp,
-      .left_shift, .right_shift].contains(kind)
+      .left_shift, .right_shift,
+    ].contains(kind)
   }
 
   func isKeyword() -> Bool {
@@ -77,4 +79,3 @@ class Token {
     return Precedence.getPrecedence(kind).rawValue
   }
 }
-

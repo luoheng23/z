@@ -135,7 +135,7 @@ final class DeclTests: BaseTests {
           print(hello)
       }
       """
-      singleExprTest(str, FnDecl.self, "", .decl)
+    singleExprTest(str, FnDecl.self, "", .decl)
   }
 
   static var allTests = [

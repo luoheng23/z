@@ -354,8 +354,7 @@ class FnDecl: Decl {
     super.init(pos)
   }
 
-  convenience init(_ name: NameExpr, _ pos: Position, _ args: TupleArgDecl, _ returns: Decl)
-  {
+  convenience init(_ name: NameExpr, _ pos: Position, _ args: TupleArgDecl, _ returns: Decl) {
     self.init(name, pos, args)
     self.returns = returns
   }

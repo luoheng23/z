@@ -87,7 +87,7 @@ enum Type: String {
   }
 
   func isComment() -> Bool {
-      return self == .comment
+    return self == .comment
   }
 
   func str() -> String {

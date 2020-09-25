@@ -1,4 +1,3 @@
-
 public enum Kind: String {
   case unknown = "unknown"
   case eof = "eof"

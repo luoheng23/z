@@ -1,4 +1,3 @@
-
 // class TypeInfo {}
 
 // class EnumCase {

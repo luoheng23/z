@@ -1,6 +1,7 @@
 import Files
 
 typealias SIndex = String.UnicodeScalarView.Index
+
 typealias SString = String
 
 class Scanner {
@@ -25,7 +26,7 @@ class Scanner {
   var insertSemi: Bool = false
   var errorCount: Int = 0
 
-  var prevTok: Token? // previous token
+  var prevTok: Token?  // previous token
   var tok: Token = Token()
 
   init(file: ZFile, src: String) {
@@ -148,8 +149,7 @@ class Scanner {
         break consumeLoop
       }
       for char in endChar {
-        if expect(want: char, startPos: pos) && countSymBefore(before: pos, symbol: "\\") % 2 == 0
-        {
+        if expect(want: char, startPos: pos) && countSymBefore(before: pos, symbol: "\\") % 2 == 0 {
           break consumeLoop
         }
       }
@@ -203,9 +203,8 @@ class Scanner {
     return getTokenString(start)
   }
 
-
   func getLineInfo(_ pos: Position) -> String {
-    return String(text[file.lines[pos.line]..<file.lines[pos.line+1]])
+    return String(text[file.lines[pos.line]..<file.lines[pos.line + 1]])
   }
 
   func scan() -> Token {
@@ -299,7 +298,6 @@ class Scanner {
     }
     return constructToken(.eof, Kind.eof.rawValue)
   }
-
 
   func error(_ str: String) {
     print(str)

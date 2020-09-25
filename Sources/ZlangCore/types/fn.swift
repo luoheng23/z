@@ -1,4 +1,3 @@
-
 // enum ValueError {
 //     case notUsed
 //     case notChanged
@@ -127,7 +126,7 @@
 //     override func str() -> String {
 //         return "Fn(\(name))"
 //     }
-    
+
 // }
 
 // class Arg: Equatable, Hashable {
@@ -214,4 +213,3 @@
 //         return "Var(\(name))"
 //     }
 // }
-
