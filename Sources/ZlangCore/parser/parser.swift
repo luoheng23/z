@@ -63,17 +63,17 @@ public class Parser {
     scope = scope.parent!
   }
 
-  func next(_ skipWhitespace: Bool = true) {
+  func next() {
     preTok = tok
     tok = peekTok
     peekTok = peekTok2
     peekTok2 = peekTok3
-    peekTok3 = scanner.scan(skipWhitespace)
+    peekTok3 = scanner.scan()
   }
 
   func endStmt() {
     while !isTok(.nl) {
-      next(false)
+      next()
       if !isTok(.space) && !isTok(.nl) {
         check(.nl)
         return
@@ -82,9 +82,9 @@ public class Parser {
   }
 
   func eatToEndOfLine() {
-    var scan = scanner.scan(false)
+    var scan = scanner.scan()
     while scan.kind != .nl && scan.kind != .eof {
-      scan = scanner.scan(false)
+      scan = scanner.scan()
     }
   }
 

@@ -63,6 +63,6 @@ extension Scanner {
       }
       _numIntegerPart(prefixStr: prefixStr)
     }
-    return getStr(start)
+    return getTokenString(start)
   }
 }
