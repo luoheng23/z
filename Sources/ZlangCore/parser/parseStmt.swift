@@ -192,6 +192,7 @@ extension Parser {
   }
 
   func stmts() -> Module {
+    readFirstToken()
     var stmts: [Stmt] = []
     while !isTok(.eof) {
       stmts.append(stmt())

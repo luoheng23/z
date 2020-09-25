@@ -76,10 +76,14 @@ class Scanner {
   }
 
   func index(pos: SIndex, after: Int) -> SIndex {
-    if let res = text.index(pos, offsetBy: after, limitedBy: text.endIndex) {
+    var limit = text.endIndex
+    if after < 0 {
+      limit = text.startIndex
+    }
+    if let res = text.index(pos, offsetBy: after, limitedBy: limit) {
       return res
     }
-    return text.endIndex
+    return limit
   }
 
   func _getTokenString(_ start: SIndex, _ end: SIndex) -> String {
@@ -102,7 +106,7 @@ class Scanner {
     return getTokenString(start)
   }
 
-  func skipWhitespace(_ skipNewLine: Bool = true) {
+  func skipWhitespace() {
     while let c = peek(), c.isWhitespace() {
       if c.isNewLine() && insertSemi {
         break
@@ -302,6 +306,7 @@ class Scanner {
   }
 
   func expect(want: String, startPos: SIndex) -> Bool {
+
     let endPos = index(pos: startPos, after: want.count)
     return want == _getTokenString(startPos, endPos)
   }

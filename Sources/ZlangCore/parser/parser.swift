@@ -5,7 +5,7 @@ public class Parser {
   static var limitedErrors = 1
   static var limitedWarnings = 1
 
-  static let builtinType = "Sources/ZlangCore/code-generator/typealias.swift"
+  static let builtinType = "Sources/ZlangCore/codeGenerator/typealias.swift"
   public var originPath: String
   public var filePath: String
 
@@ -29,7 +29,8 @@ public class Parser {
     self.originPath = filePath
     self.filePath = String(filePath.split(separator: ".")[0] + ".swift")
     self.scope = globalScope
-    if let data = try? (try? File(path: Parser.builtinType))?.read() {
+
+    if let data = try? (try? File(path: filePath))?.read() {
       self.scanner = Scanner(file: ZFile(filePath, data.count), src: String(decoding: data, as: UTF8.self))
     } else {
       self.scanner = Scanner("")

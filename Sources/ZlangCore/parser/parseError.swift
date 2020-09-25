@@ -23,7 +23,6 @@ extension Parser {
             }
             exit(1)
         }
-        readFirstToken()
     }
 
     func warnWithPos(_ str: String, _ pos: Position) {
