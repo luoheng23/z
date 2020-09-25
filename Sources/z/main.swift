@@ -15,7 +15,7 @@ func main() {
     task.arguments = ["swiftc", parse.filePath]
   } else {
     parse = Parser(CommandLine.arguments[1])
-    task.arguments = ["swiftc", parse.filePath]
+    task.arguments = ["swift", parse.filePath]
   }
   parse.parseToFile()
 
