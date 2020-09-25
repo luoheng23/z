@@ -1,0 +1,87 @@
+# Grammar for Z
+
+# This is modified from python grammar.
+
+# Start symbols for the grammar:
+#       single_input is a single interactive statement;
+#       file_input is a module or sequence of commands read from an input file;
+
+single_input: NEWLINE | simple_stmt | compound_stmt
+file_input: (NEWLINE | stmt)* ENDMARKER
+
+# TODO
+decorator: '@' dotted_name [ '(' [arglist] ')' ]
+decorators: decorator+
+decorated: decorators funcdef
+
+funcdef: 'fn' NAME parameters [test] block
+
+parameters: '(' [typedargslist] ')'
+typedargslist: (tfpdef ['=' test] (',' tfpdef ['=' test])* [',' [
+        '*' [tfpdef] (',' tfpdef ['=' test])* [',' ['**' tfpdef [',']]]
+      | '**' tfpdef [',']]]
+  | '*' [tfpdef] (',' tfpdef ['=' test])* [',' ['**' tfpdef [',']]]
+  | '**' tfpdef [','])
+tfpdef: NAME [['mut'] test]
+namdef: NAME [test]
+
+stmt: simple_stmt | compound_stmt
+simple_stmt: small_stmt (';' small_stmt)* [';']
+small_stmt: (expr_stmt | flow_stmt | import_stmt | inc_stmt | decl_stmt)
+inc_stmt: test ('++'|'--')
+expr_stmt: testlist [augassign testlist]
+decl_stmt: ('let' | 'var' | 'type') namdeflist ['=' testlist]
+namdeflist: namdef (',' namdef)*
+
+augassign: ('=' | '+=' | '-=' | '*=' | '/=' | '%=' | '&=' | '|=' | '^=' | '<<=' | '>>=' | '**=')
+
+flow_stmt: break_stmt | continue_stmt | return_stmt | yield_stmt | fallthrough_stmt
+break_stmt: 'break'
+continue_stmt: 'continue'
+return_stmt: 'return' [testlist]
+fallthrough_stmt: 'fallthrough'
+
+import_stmt: 'import' ['('] import_as_name (',' import_as_name)* [','] [')']
+import_as_name: NAME ['as' NAME]
+
+dotted_name: NAME ('.' NAME)*
+
+compound_stmt: if_stmt | switch_stmt | for_stmt | with_stmt | funcdef | structdef | decorated | defer_stmt | go_stmt
+if_stmt: 'if' test block ('else if' test block)* ['else' block]
+for_stmt: 'for' exprlist 'in' testlist block | 'for' test block | 'for' block
+with_stmt: 'with' decl (',' decl)* block
+defer_stmt: 'defer' test
+go_stmt: 'go' test
+
+block: '{' stmt+ '}'
+
+test: or_test ['?' or_test ':' test]
+or_test: and_test ('or' and_test)*
+and_test: not_test ('and' not_test)*
+not_test: 'not' not_test | comparison
+comparison: expr comp_op expr
+comp_op: '<'|'>'|'=='|'>='|'<='|'!='|'in'|'not' 'in'|'is'|'is' 'not'
+
+expr: xor_expr ('|' xor_expr)*
+xor_expr: and_expr ('^' and_expr)*
+and_expr: shift_expr ('&' shift_expr)*
+shift_expr: arith_expr (('<<'|'>>') arith_expr)*
+arith_expr: term (('+'|'-') term)*
+term: factor (('*'|'/'|'%') factor)*
+factor: ('+'|'-'|'~') factor | power
+power: atom_expr ['**' factor]
+atom_expr: atom trailer*
+atom: ('(' [testlist] ')' |
+       '[' [testlist] ']' |
+       '{' [dictorsetmaker] '}' |
+       NAME | NUMBER | STRING | 'nil' | 'true' | 'false')
+trailer: '(' [arglist] ')' | '[' test ']' | '.' NAME
+
+exprlist: expr (',' expr)* [',']
+testlist: test (',' test)* [',']
+keyvalue: test ':' test
+keyvalueList: keyvalue (',' keyvalue)*
+dictorsetmaker: testlist | keyvalueList
+
+arglist: argument (',' argument)*  [',']
+argument: ( test | test '=' test)
