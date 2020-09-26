@@ -47,10 +47,40 @@ final class TokenTests: XCTestCase {
     XCTAssert(Kind.Splits.count == split.count, "Failed to test split length.")
   }
 
+  func testWhitespace() {
+    let whitespace = ["\t", " ", "\r", "\n"]
+    for ws in whitespace {
+      XCTAssert(Kind(rawValue: ws)?.isDecl() != nil, "Failed to test whitespace: " + ws)
+    }
+    XCTAssert(Kind.Whitespace.count == whitespace.count, "Failed to test whitespace length.")
+  }
+
+  func testOperators() {
+    let operators = ["+", "-", "*", "/", "**", "%", "^", "|", "~", "&", "@", ".", "=", ">", "<"]
+    for op in operators {
+      XCTAssert(Kind(rawValue: op)?.isDecl() != nil, "Failed to test operators: " + op)
+    }
+    XCTAssert(Kind.Operators.count == operators.count, "Failed to test operators length.")
+  }
+
+  func testKeywords() {
+    let keywords = ["and", "break", "case", "let", "continue", "default",
+                    "defer", "with", "else", "enum", "impl", "false", "fallthrough", "for",
+                    "fn", "go", "if", "import", "in", "interface", "is", "mut", "not", "pub", "or",
+                    "static", "struct", "switch", "return", "true", "type", "var", "with"]
+    for kw in keywords {
+      XCTAssert(Kind(rawValue: kw)?.isDecl() != nil, "Failed to test keywords: " + kw)
+    }
+    XCTAssert(Kind.keywords.count == keywords.count, "Failed to test keywords length.")
+  }
+
   static var allTests = [
     ("testDecl", testDecl),
     ("testAssign", testAssign),
     ("testSplit", testSplit),
     ("testBuildKeys", testBuildKeys),
+    ("testKeywords", testKeywords),
+    ("testWhitespace", testWhitespace),
+    ("testOperators", testOperators),
   ]
 }
