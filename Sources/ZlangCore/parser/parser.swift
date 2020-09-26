@@ -1,11 +1,30 @@
 import Files
+import PathKit
 
 public class Parser {
 
   static var limitedErrors = 1
   static var limitedWarnings = 1
 
-  static let builtinType = "Sources/ZlangCore/codeGenerator/typealias.swift"
+  static let builtinType = """
+  typealias int = Int
+  typealias int8 = Int8
+  typealias int16 = Int16
+  typealias int32 = Int32
+  typealias int64 = Int64
+  typealias uint = UInt
+  typealias uint8 = UInt8
+  typealias uint16 = UInt16
+  typealias uint32 = UInt32
+  typealias uint64 = UInt64
+  typealias float = Float
+  typealias double = Double
+  typealias char = Character
+  typealias string = String
+  typealias list = Array
+  typealias dict = Dictionary
+
+  """
   public var originPath: String
   public var filePath: String
 
@@ -30,7 +49,7 @@ public class Parser {
     self.filePath = String(filePath.split(separator: ".")[0] + ".swift")
     self.scope = globalScope
 
-    if let data = try? (try? File(path: filePath))?.read() {
+    if let data = try? Path(filePath).read() {
       self.scanner = Scanner(
         file: ZFile(filePath, data.count), src: String(decoding: data, as: UTF8.self))
     } else {
@@ -108,13 +127,29 @@ public class Parser {
     return peekTok.kind == expected
   }
 
+  func tryCreateFile() -> Bool {
+    let path = Path(filePath)
+    if !path.exists {
+      do {
+        let folder = try Folder(path: ".")
+        try path.mkpath()
+      } catch let err {
+        print(err)
+        return false
+      }
+    }
+    return true
+  }
+
   public func parseToFile() {
+    if !tryCreateFile() {
+      return
+    }
     let module = stmts()
-    if let file = try? File(path: filePath),
-      let typ = try? (try? File(path: Parser.builtinType))?.read()
-    {
+  
+    if let file = try? File(path: filePath) {
       _ = try? file.write("")
-      _ = try? file.append(String(decoding: typ, as: UTF8.self))
+      _ = try? file.append(Parser.builtinType)
       _ = try? file.append(module.gen())
     }
   }
