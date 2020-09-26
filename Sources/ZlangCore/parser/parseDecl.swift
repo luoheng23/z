@@ -2,7 +2,7 @@ extension Parser {
   func decl() -> Decl {
     var node: Decl
     switch tok.kind {
-    case .key_var, .key_const:
+    case .key_var, .key_let:
       node = varOrConstDecl()
     case .key_type:
       node = typeDecl()
@@ -55,7 +55,7 @@ extension Parser {
     if isVar {
       check(.key_var)
     } else {
-      check(.key_const)
+      check(.key_let)
     }
     let basicName = basicNameDecl(false)
     basicName.isVar = isVar
@@ -99,7 +99,7 @@ extension Parser {
     if isVar {
       check(.key_var)
     } else {
-      check(.key_const)
+      check(.key_let)
     }
     check(.lpar)
     let left = basicTupleExpr({ () -> OneNameAnnotationDecl in basicNameDecl() })

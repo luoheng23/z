@@ -14,19 +14,6 @@ import XCTest
 
 final class ScannerTests: XCTestCase {
 
-  private var folder: Folder!
-
-  override func setUp() {
-    super.setUp()
-    folder = try! Folder.home.createSubfolderIfNeeded(withName: ".filesTest")
-    try! folder.empty()
-  }
-
-  override func tearDown() {
-    try? folder.delete()
-    super.tearDown()
-  }
-
   func testName() {
     let str = "name hello good th 恶魔"
     let answer = str.split(separator: " ")
@@ -74,11 +61,11 @@ final class ScannerTests: XCTestCase {
 
   func testScan() {
     let str = """
-        const a = 10
+        let a = 10
         var b = 20
         print(a + b)
         """
-    let answer = ["const", "a", "=", "10", "var", "b", "=", "20", "print", "(", "a", "+", "b", ")"]
+    let answer = ["let", "a", "=", "10", "var", "b", "=", "20", "print", "(", "a", "+", "b", ")"]
     let scanner = Scanner(str)
     for word in answer {
       let name = scanner.scan().lit

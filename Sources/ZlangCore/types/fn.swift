@@ -151,7 +151,7 @@
 
 // class Var: Value, Equatable {
 //     var typ: Type
-//     var const: Bool { !isVar }
+//     var let: Bool { !isVar }
 //     var tableForType: TableForType? = nil
 //     var tableForVar: TableForType? = nil
 

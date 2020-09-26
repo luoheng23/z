@@ -55,7 +55,7 @@ final class StmtTests: BaseTests {
 
   func testWithStmt() {
     let str = """
-      with const s = open(file) {
+      with let s = open(file) {
           print(s)
       }
       """

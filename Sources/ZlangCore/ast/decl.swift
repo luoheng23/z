@@ -85,7 +85,7 @@ class OneNameAnnotationDecl: Decl {
 
 class NameDecl: OneNameAnnotationDecl {
   override var word: String {
-    get { isVar ? "var " : "const " }
+    get { isVar ? "var " : "let " }
     set {}
   }
 }
@@ -146,7 +146,7 @@ class TupleNameDecl: Decl {
   var left: [OneNameAnnotationDecl]
   var right: TupleExpr?
   var isVar: Bool
-  var word: String { isVar ? "var" : "const" }
+  var word: String { isVar ? "var" : "let" }
 
   init(_ left: [OneNameAnnotationDecl], _ pos: Position, _ isVar: Bool = false) {
     self.left = left

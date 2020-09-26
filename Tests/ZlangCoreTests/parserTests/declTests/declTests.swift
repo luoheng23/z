@@ -7,17 +7,17 @@ final class DeclTests: BaseTests {
     var str = [
       "var s = 20",
       "var s String",
-      "const s = 20",
-      "const s String",
+      "let s = 20",
+      "let s String",
     ]
     multiExprTests(str, NameDecl.self, "", .decl)
     str = [
       "var (s, t) = (20, 30)",
       "var (s Int, t String)",
       "var (s Int, t) = (20, 30)",
-      "const (s, t) = (20, 30)",
-      "const (s Int, t String)",
-      "const (s Int, t) = (20, 30)",
+      "let (s, t) = (20, 30)",
+      "let (s Int, t String)",
+      "let (s Int, t) = (20, 30)",
     ]
     multiExprTests(str, TupleNameDecl.self, "", .decl)
   }
@@ -39,11 +39,11 @@ final class DeclTests: BaseTests {
           var (s, t) = (20, 30)
           var (s Int, t String)
           var (s Int, t) = (20, 30)
-          const s = 20
-          const s String
-          const (s, t) = (20, 30)
-          const (s Int, t String)
-          const (s Int, t) = (20, 30)
+          let s = 20
+          let s String
+          let (s, t) = (20, 30)
+          let (s Int, t String)
+          let (s Int, t) = (20, 30)
           enum name {}
           impl name {}
           fn name() {}
@@ -65,11 +65,11 @@ final class DeclTests: BaseTests {
           var (s, t) = (20, 30)
           var (s Int, t String)
           var (s Int, t) = (20, 30)
-          const s = 20
-          const s String
-          const (s, t) = (20, 30)
-          const (s Int, t String)
-          const (s Int, t) = (20, 30)
+          let s = 20
+          let s String
+          let (s, t) = (20, 30)
+          let (s Int, t String)
+          let (s Int, t) = (20, 30)
           enum name {}
           impl name {}
           fn name() {}
@@ -89,11 +89,11 @@ final class DeclTests: BaseTests {
           var (s, t) = (20, 30)
           var (s Int, t String)
           var (s Int, t) = (20, 30)
-          const s = 20
-          const s String
-          const (s, t) = (20, 30)
-          const (s Int, t String)
-          const (s Int, t) = (20, 30)
+          let s = 20
+          let s String
+          let (s, t) = (20, 30)
+          let (s Int, t String)
+          let (s Int, t) = (20, 30)
           enum name {}
           impl name {}
           fn name() {}
@@ -113,11 +113,11 @@ final class DeclTests: BaseTests {
           var (s, t) = (20, 30)
           var (s Int, t String)
           var (s Int, t) = (20, 30)
-          const s = 20
-          const s String
-          const (s, t) = (20, 30)
-          const (s Int, t String)
-          const (s Int, t) = (20, 30)
+          let s = 20
+          let s String
+          let (s, t) = (20, 30)
+          let (s Int, t String)
+          let (s Int, t) = (20, 30)
           enum name {}
           impl name {}
           fn name() {}

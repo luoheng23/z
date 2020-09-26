@@ -32,16 +32,25 @@ final class TokenTests: XCTestCase {
   }
 
   func testDecl() {
-    let decl = ["enum", "interface", "fn", "struct", "const", "type", "var", "impl"]
+    let decl = ["enum", "interface", "fn", "struct", "let", "type", "var", "impl"]
     for dec in decl {
       XCTAssert(Kind(rawValue: dec)?.isDecl() != nil, "Failed to test decl: " + dec)
     }
     XCTAssert(Kind.Decls.count == decl.count, "Failed to test decl length.")
   }
 
+  func testSplit() {
+    let split = ["(", ")", "{", "}", "[", "]", "?", ",", ":", ";", "\""]
+    for spt in split {
+      XCTAssert(Kind(rawValue: spt)?.isDecl() != nil, "Failed to test split: " + spt)
+    }
+    XCTAssert(Kind.Splits.count == split.count, "Failed to test split length.")
+  }
+
   static var allTests = [
     ("testDecl", testDecl),
     ("testAssign", testAssign),
+    ("testSplit", testSplit),
     ("testBuildKeys", testBuildKeys),
   ]
 }

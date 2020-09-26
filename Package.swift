@@ -24,7 +24,7 @@ let package = Package(
             ]),
         .testTarget(
             name: "ZlangCoreTests",
-            dependencies: ["ZlangCore", "Files"]),
+            dependencies: ["ZlangCore"]),
         .target(
             name: "z",
             dependencies: ["ZlangCore"]),

@@ -4,7 +4,7 @@ let keyword = [
   "impl": "extension",
   "interface": "protocol",
   "fn": "func",
-  "const": "let",
+  "let": "let",
 ]
 
 precedencegroup powOperator {

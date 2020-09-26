@@ -4,7 +4,7 @@ extension Parser {
     switch tok.kind {
     case .lcbr:
       node = blockStmt()
-    case .key_const, .key_var, .key_func, .key_struct, .key_enum, .key_interface, .key_impl,
+    case .key_let, .key_var, .key_func, .key_struct, .key_enum, .key_interface, .key_impl,
       .key_type:
       node = decl()
     case .comment:

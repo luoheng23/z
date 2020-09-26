@@ -63,7 +63,7 @@ public enum Kind: String {
   case key_and = "and"
   case key_break = "break"
   case key_case = "case"
-  case key_const = "const"
+  case key_let = "let"
   case key_continue = "continue"
   case key_default = "default"
   case key_defer = "defer"
@@ -114,7 +114,7 @@ public enum Kind: String {
     .key_and,
     .key_break,
     .key_case,
-    .key_const,
+    .key_let,
     .key_continue,
     .key_default,
     .key_defer,
@@ -155,7 +155,7 @@ public enum Kind: String {
     .key_func,
     .key_struct,
     .key_type,
-    .key_const,
+    .key_let,
     .key_var,
   ]
 
@@ -226,9 +226,6 @@ public enum Kind: String {
   }
 
   func text() -> String {
-    if self.rawValue == "not" {
-      return "not "
-    }
     return self.rawValue
   }
 
