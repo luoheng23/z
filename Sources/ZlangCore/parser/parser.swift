@@ -131,7 +131,6 @@ public class Parser {
     let path = Path(filePath)
     if !path.exists {
       do {
-        let folder = try Folder(path: ".")
         try path.mkpath()
       } catch let err {
         print(err)
@@ -142,9 +141,9 @@ public class Parser {
   }
 
   public func parseToFile() {
-    if !tryCreateFile() {
-      return
-    }
+    // if !tryCreateFile() {
+    //   return
+    // }
     let module = stmts()
   
     if let file = try? File(path: filePath) {
