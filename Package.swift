@@ -9,7 +9,10 @@ let package = Package(
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
         .package(url: "https://github.com/JohnSundell/Files", from: "4.0.0"),
-        .package(url: "https://github.com/deus-x-mackina/console-color", from: "0.1.1"),
+        .package(
+            url: "https://github.com/deus-x-mackina/console-color",
+            from: "0.1.1"
+        ),
         .package(url: "https://github.com/kylef/PathKit", from: "1.0.0"),
         .package(url: "https://github.com/luoheng23/ospath", from: "1.0.0"),
     ],
@@ -19,16 +22,19 @@ let package = Package(
         .target(
             name: "ZlangCore",
             dependencies: [
-                "Files", 
+                "Files",
                 "PathKit",
                 "ospath",
                 .product(name: "ConsoleColor", package: "console-color"),
-            ]),
+            ]
+        ),
         .testTarget(
             name: "ZlangCoreTests",
-            dependencies: ["ZlangCore"]),
+            dependencies: ["ZlangCore"]
+        ),
         .target(
             name: "z",
-            dependencies: ["ZlangCore"]),
+            dependencies: ["ZlangCore"]
+        ),
     ]
 )

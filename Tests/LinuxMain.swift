@@ -1,5 +1,4 @@
 import XCTest
-
 import ZlangCoreTests
 
 var tests = [XCTestCaseEntry]()

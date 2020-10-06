@@ -1,98 +1,100 @@
 enum Type: String {
-  case unknown = "unknown"
-  case _nil = "nil"
-  case int8 = "int8"
-  case int16 = "int16"
-  case int32 = "int32"
-  case int64 = "int64"
-  case int = "int"
-  case uint8 = "uint8"
-  case uint16 = "uint16"
-  case uint32 = "uint32"
-  case uint64 = "uint64"
-  case uint = "uint"
-  case char = "char"
-  case float = "float"
-  case double = "double"
-  case string = "string"
-  case bool = "bool"
-  case list = "list"
-  case dict = "dict"
-  case _set = "set"
-  case _struct = "struct"
-  case _enum = "enum"
-  case tuple = "tuple"
-  case function = "fn"
-  case alias = "alias"
-  case comment = "comment"
+    case unknown = "unknown"
+    case _nil = "nil"
+    case int8 = "int8"
+    case int16 = "int16"
+    case int32 = "int32"
+    case int64 = "int64"
+    case int = "int"
+    case uint8 = "uint8"
+    case uint16 = "uint16"
+    case uint32 = "uint32"
+    case uint64 = "uint64"
+    case uint = "uint"
+    case char = "char"
+    case float = "float"
+    case double = "double"
+    case string = "string"
+    case bool = "bool"
+    case list = "list"
+    case dict = "dict"
+    case _set = "set"
+    case _struct = "struct"
+    case _enum = "enum"
+    case tuple = "tuple"
+    case function = "fn"
+    case alias = "alias"
+    case comment = "comment"
 
-  init?() {
-    self.init(rawValue: "unknown")
-  }
+    init?() {
+        self.init(rawValue: "unknown")
+    }
 
-  static let signedIntegers: [Type] = [.int8, .int16, .int32, .int64, .int]
-  static let unsignedIntegers: [Type] = [.uint8, .uint16, .uint32, .uint64, .uint]
-  static let floats: [Type] = [.float, .double]
+    static let signedIntegers: [Type] = [.int8, .int16, .int32, .int64, .int]
+    static let unsignedIntegers: [Type] = [
+        .uint8, .uint16, .uint32, .uint64, .uint,
+    ]
+    static let floats: [Type] = [.float, .double]
 
-  func isSigned() -> Bool {
-    return Type.signedIntegers.contains(self)
-  }
+    func isSigned() -> Bool {
+        return Type.signedIntegers.contains(self)
+    }
 
-  func isUnsigned() -> Bool {
-    return Type.unsignedIntegers.contains(self)
-  }
+    func isUnsigned() -> Bool {
+        return Type.unsignedIntegers.contains(self)
+    }
 
-  func isFloat() -> Bool {
-    return Type.floats.contains(self)
-  }
+    func isFloat() -> Bool {
+        return Type.floats.contains(self)
+    }
 
-  func isInteger() -> Bool {
-    return isSigned() || isUnsigned()
-  }
+    func isInteger() -> Bool {
+        return isSigned() || isUnsigned()
+    }
 
-  func isString() -> Bool {
-    return self == .string
-  }
+    func isString() -> Bool {
+        return self == .string
+    }
 
-  func isFunction() -> Bool {
-    return self == .function
-  }
+    func isFunction() -> Bool {
+        return self == .function
+    }
 
-  func isEnum() -> Bool {
-    return self == ._enum
-  }
+    func isEnum() -> Bool {
+        return self == ._enum
+    }
 
-  func isStruct() -> Bool {
-    return self == ._struct
-  }
+    func isStruct() -> Bool {
+        return self == ._struct
+    }
 
-  func isList() -> Bool {
-    return self == .list
-  }
+    func isList() -> Bool {
+        return self == .list
+    }
 
-  func isDict() -> Bool {
-    return self == .dict
-  }
+    func isDict() -> Bool {
+        return self == .dict
+    }
 
-  func isSet() -> Bool {
-    return self == ._set
-  }
+    func isSet() -> Bool {
+        return self == ._set
+    }
 
-  func isTuple() -> Bool {
-    return self == .tuple
-  }
+    func isTuple() -> Bool {
+        return self == .tuple
+    }
 
-  func isAlias() -> Bool {
-    return self == .alias
-  }
+    func isAlias() -> Bool {
+        return self == .alias
+    }
 
-  func isComment() -> Bool {
-    return self == .comment
-  }
+    func isComment() -> Bool {
+        return self == .comment
+    }
 
-  func str() -> String {
-    return self.rawValue
-  }
+    func str() -> String {
+        return self.rawValue
+    }
 }
 
 // class Type: Equatable, Hashable {

@@ -1,11 +1,11 @@
 class CodeGenerator {
-  var tree: Ast
+    var tree: Ast
 
-  init(_ tree: Ast) {
-    self.tree = tree
-  }
+    init(_ tree: Ast) {
+        self.tree = tree
+    }
 
-  func gen() -> String {
-    return tree.gen()
-  }
+    func gen() -> String {
+        return tree.gen()
+    }
 }

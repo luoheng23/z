@@ -4,140 +4,151 @@ import ospath
 
 public class Parser {
 
-  static var limitedErrors = 1
-  static var limitedWarnings = 1
+    static var limitedErrors = 1
+    static var limitedWarnings = 1
 
-  static let builtinType = """
-  typealias int = Int
-  typealias int8 = Int8
-  typealias int16 = Int16
-  typealias int32 = Int32
-  typealias int64 = Int64
-  typealias uint = UInt
-  typealias uint8 = UInt8
-  typealias uint16 = UInt16
-  typealias uint32 = UInt32
-  typealias uint64 = UInt64
-  typealias float = Float
-  typealias double = Double
-  typealias char = Character
-  typealias string = String
-  typealias list = Array
-  typealias dict = Dictionary
+    static let builtinType = """
+        typealias int = Int
+        typealias int8 = Int8
+        typealias int16 = Int16
+        typealias int32 = Int32
+        typealias int64 = Int64
+        typealias uint = UInt
+        typealias uint8 = UInt8
+        typealias uint16 = UInt16
+        typealias uint32 = UInt32
+        typealias uint64 = UInt64
+        typealias float = Float
+        typealias double = Double
+        typealias char = Character
+        typealias string = String
+        typealias list = Array
+        typealias dict = Dictionary
 
-  """
-  public var originPath: String
-  public var filePath: String
+        """
+    public var originPath: String
+    public var filePath: String
 
-  var scanner: Scanner
-  var tok: Token = Token()
-  var preTok: Token = Token()
-  var peekTok: Token = Token()
-  var peekTok2: Token = Token()
-  var peekTok3: Token = Token()
+    var scanner: Scanner
+    var tok: Token = Token()
+    var preTok: Token = Token()
+    var peekTok: Token = Token()
+    var peekTok2: Token = Token()
+    var peekTok3: Token = Token()
 
-  var curFnName: String = ""
+    var curFnName: String = ""
 
-  var mod: String = ""
-  var scope: Scope
-  var globalScope: Scope = Scope(true)
+    var mod: String = ""
+    var scope: Scope
+    var globalScope: Scope = Scope(true)
 
-  var errors: [Error] = []
-  var warnings: [Warning] = []
+    var errors: [Error] = []
+    var warnings: [Warning] = []
 
-  public init(_ filePath: String) {
-    let basename = OSPath.basename(filePath)
-    self.originPath = OSPath.abspath(filePath)
-    self.filePath = OSPath.join(OSPath.dirname(self.originPath), String(basename.split(separator: ".")[0] + ".swift"))
-    self.scope = globalScope
-    if let data = try? Path(filePath).read() {
-      self.scanner = Scanner(
-        file: ZFile(filePath, data.count), src: String(decoding: data, as: UTF8.self))
-    } else {
-      self.scanner = Scanner("")
-      error("unknown file: \(filePath)")
+    public init(_ filePath: String) {
+        let basename = OSPath.basename(filePath)
+        self.originPath = OSPath.abspath(filePath)
+        self.filePath = OSPath.join(
+            OSPath.dirname(self.originPath),
+            String(basename.split(separator: ".")[0] + ".swift")
+        )
+        self.scope = globalScope
+        if let data = try? Path(filePath).read() {
+            self.scanner = Scanner(
+                file: ZFile(filePath, data.count),
+                src: String(decoding: data, as: UTF8.self)
+            )
+        }
+        else {
+            self.scanner = Scanner("")
+            error("unknown file: \(filePath)")
+        }
+
     }
 
-  }
-
-  public init(str: String) {
-    self.originPath = ""
-    self.filePath = ""
-    self.scope = globalScope
-    self.scanner = Scanner(str)
-  }
-
-  func readFirstToken() {
-    for _ in 1...4 {
-      check(.unknown, true)
+    public init(str: String) {
+        self.originPath = ""
+        self.filePath = ""
+        self.scope = globalScope
+        self.scanner = Scanner(str)
     }
-  }
 
-  func openScope() {
-    scope = Scope(parent: scope, pos: tok.pos)
-  }
-
-  func closeScope() {
-    if scope === globalScope {
-      fatalError("unexpected close global scope")
+    func readFirstToken() {
+        for _ in 1...4 {
+            check(.unknown, true)
+        }
     }
-    scope.parent!.children.append(scope)
-    scope = scope.parent!
-  }
 
-  func next() {
-    preTok = tok
-    tok = peekTok
-    peekTok = peekTok2
-    peekTok2 = peekTok3
-    peekTok3 = scanner.scan()
-  }
-
-  func endStmt() {
-    while !isTok(.nl) {
-      next()
-      if !isTok(.space) && !isTok(.nl) {
-        check(.nl)
-        return
-      }
+    func openScope() {
+        scope = Scope(parent: scope, pos: tok.pos)
     }
-  }
 
-  func eatToEndOfLine() {
-    var scan = scanner.scan()
-    while scan.kind != .nl && scan.kind != .eof {
-      scan = scanner.scan()
+    func closeScope() {
+        if scope === globalScope {
+            fatalError("unexpected close global scope")
+        }
+        scope.parent!.children.append(scope)
+        scope = scope.parent!
     }
-  }
 
-  @discardableResult
-  func check(_ expected: Kind, _ skip: Bool = false) -> Token {
-    if !skip && !isTok(expected) {
-      error("unexpected token '\(tok.text())', expecting '\(expected.text())'")
-      return Token()
+    func next() {
+        preTok = tok
+        tok = peekTok
+        peekTok = peekTok2
+        peekTok2 = peekTok3
+        peekTok3 = scanner.scan()
     }
-    next()
-    return preTok
-  }
 
-  func isTok(_ expected: Kind) -> Bool {
-    return tok.kind == expected
-  }
-
-  func isNextTok(_ expected: Kind) -> Bool {
-    return peekTok.kind == expected
-  }
-
-  public func parseToFile() {
-    let module = stmts()
-    if OS.open(filePath) {
-      if let file = try? File(path: filePath) {
-        _ = try? file.write("")
-        _ = try? file.append(Parser.builtinType)
-        _ = try? file.append(module.gen())
-      }
-    } else {
-      fatalError("Cannot create file in this folder: \(OSPath.dirname(filePath))")
+    func endStmt() {
+        while !isTok(.nl) {
+            next()
+            if !isTok(.space) && !isTok(.nl) {
+                check(.nl)
+                return
+            }
+        }
     }
-  }
+
+    func eatToEndOfLine() {
+        var scan = scanner.scan()
+        while scan.kind != .nl && scan.kind != .eof {
+            scan = scanner.scan()
+        }
+    }
+
+    @discardableResult
+    func check(_ expected: Kind, _ skip: Bool = false) -> Token {
+        if !skip && !isTok(expected) {
+            error(
+                "unexpected token '\(tok.text())', expecting '\(expected.text())'"
+            )
+            return Token()
+        }
+        next()
+        return preTok
+    }
+
+    func isTok(_ expected: Kind) -> Bool {
+        return tok.kind == expected
+    }
+
+    func isNextTok(_ expected: Kind) -> Bool {
+        return peekTok.kind == expected
+    }
+
+    public func parseToFile() {
+        let module = stmts()
+        if OS.open(filePath) {
+            if let file = try? File(path: filePath) {
+                _ = try? file.write("")
+                _ = try? file.append(Parser.builtinType)
+                _ = try? file.append(module.gen())
+            }
+        }
+        else {
+            fatalError(
+                "Cannot create file in this folder: \(OSPath.dirname(filePath))"
+            )
+        }
+    }
 }

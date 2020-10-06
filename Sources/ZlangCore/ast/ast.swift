@@ -1,18 +1,18 @@
 class Ast: Position {
-  // readonly node name
-  var node: String { String(describing: type(of: self)) }
+    // readonly node name
+    var node: String { String(describing: type(of: self)) }
 
-  func str() -> String {
-    return "\(node)()"
-  }
+    func str() -> String {
+        return "\(node)()"
+    }
 
-  func text() -> String {
-    return ""
-  }
+    func text() -> String {
+        return ""
+    }
 
-  func gen() -> String {
-    return text()
-  }
+    func gen() -> String {
+        return text()
+    }
 }
 
 class Decl: Stmt {}
