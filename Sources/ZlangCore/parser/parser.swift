@@ -1,5 +1,6 @@
 import Files
 import PathKit
+import ospath
 
 public class Parser {
 
@@ -45,10 +46,10 @@ public class Parser {
   var warnings: [Warning] = []
 
   public init(_ filePath: String) {
-    self.originPath = filePath
-    self.filePath = String(filePath.split(separator: ".")[0] + ".swift")
+    let basename = OSPath.basename(filePath)
+    self.originPath = OSPath.abspath(filePath)
+    self.filePath = OSPath.join(OSPath.dirname(self.originPath), String(basename.split(separator: ".")[0] + ".swift"))
     self.scope = globalScope
-
     if let data = try? Path(filePath).read() {
       self.scanner = Scanner(
         file: ZFile(filePath, data.count), src: String(decoding: data, as: UTF8.self))
@@ -127,29 +128,16 @@ public class Parser {
     return peekTok.kind == expected
   }
 
-  func tryCreateFile() -> Bool {
-    let path = Path(filePath)
-    if !path.exists {
-      do {
-        try path.mkpath()
-      } catch let err {
-        print(err)
-        return false
-      }
-    }
-    return true
-  }
-
   public func parseToFile() {
-    // if !tryCreateFile() {
-    //   return
-    // }
     let module = stmts()
-  
-    if let file = try? File(path: filePath) {
-      _ = try? file.write("")
-      _ = try? file.append(Parser.builtinType)
-      _ = try? file.append(module.gen())
+    if OS.open(filePath) {
+      if let file = try? File(path: filePath) {
+        _ = try? file.write("")
+        _ = try? file.append(Parser.builtinType)
+        _ = try? file.append(module.gen())
+      }
+    } else {
+      fatalError("Cannot create file in this folder: \(OSPath.dirname(filePath))")
     }
   }
 }

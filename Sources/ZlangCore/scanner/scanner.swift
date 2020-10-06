@@ -1,7 +1,5 @@
-import Files
 
 typealias SIndex = String.UnicodeScalarView.Index
-
 typealias SString = String
 
 class Scanner {
